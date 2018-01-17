@@ -25,7 +25,7 @@
             android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_weight="65"
-            android:layout_height="75dp"
+            android:layout_height="90dp"
             android:layout_marginTop="10dp"
             >
             <RelativeLayout 
@@ -43,45 +43,57 @@
                     android:layout_marginTop="4dp"
                     tools:text="Video Name"
                     />
-                <ImageView
-                    android:id="@+id/list_item_clock_imageview"
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:layout_marginTop="4dp"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/ic_timer_dark_blue"
-                    android:layout_alignParentLeft="true"
-                    android:layout_below="@id/list_item_video_name_textview"
-                    />
-                <TextView
-                    android:id="@+id/list_item_video_duration_textview"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAllCaps="false"
-                    android:layout_marginLeft="4dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_below="@id/list_item_video_name_textview"
-                    android:layout_toRightOf="@id/list_item_clock_imageview"
-                    tools:text="00m:00s"
-                    />
-                <ImageView
-                    android:id="@+id/list_item_location_imageview"
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/ic_location_dark_blue"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignParentLeft="true"
-                    />
-                <TextView
-                    android:id="@+id/list_item_video_location_textview"
+                <LinearLayout
+                    android:id="@+id/list_item_clock_container"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="4dp"
-                    android:layout_alignParentBottom="true"
-                    android:layout_toRightOf="@id/list_item_location_imageview"
-                    tools:text="Prince Faisal St., Dhahran"
-                    />
+                    android:layout_below="@id/list_item_video_name_textview"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginLeft="6dp"
+                    >
+                    <ImageView
+                        android:id="@+id/list_item_clock_imageview"
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:layout_gravity="center_vertical"
+
+                        android:scaleType="fitXY"
+                        android:src="@drawable/ic_timer_dark_blue"
+                        />
+                    <TextView
+                        android:id="@+id/list_item_video_duration_textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:textAllCaps="false"
+                        android:layout_marginLeft="4dp"
+                        tools:text="00m:00s"
+                        />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/list_item_clock_container"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginLeft="6dp"
+                    >
+                    <ImageView
+                        android:id="@+id/list_item_location_imageview"
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:layout_gravity="center_vertical"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/ic_location_dark_blue"
+                        />
+                    <TextView
+                        android:id="@+id/list_item_video_location_textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="4dp"
+                        tools:text="Prince Faisal St., Dhahran"
+                        />
+                </LinearLayout>
             </RelativeLayout>
         </LinearLayout>
     </LinearLayout>

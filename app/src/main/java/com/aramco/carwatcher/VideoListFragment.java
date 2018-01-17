@@ -123,7 +123,7 @@ public class VideoListFragment extends Fragment
         public void bindVideo(Video v)
         {
             nameTextView.setText(v.getTitle());
-            durationTextView.setText(v.getDuration());
+            durationTextView.setText(Integer.toString(v.getDuration()));
             locationTextView.setText(v.getLocation());
         }
 

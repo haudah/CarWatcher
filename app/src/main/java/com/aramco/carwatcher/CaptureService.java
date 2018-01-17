@@ -5,6 +5,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -13,6 +14,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
 import android.os.Environment;
 import android.os.Handler;
@@ -27,7 +29,9 @@ import android.view.Surface;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -353,13 +357,13 @@ public class CaptureService extends Service
         //if all went well, add the new video file to the DB
         String title = new SimpleDateFormat("yyyy/MM/dd-HH:mm").format(new Date());
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(getVideoFilePath(videoFileName));
+        mmr.setDataSource(getVideoFilePath(videoFileName, this));
         int milliseconds = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-        int duration = TimeUnit.MILLISECONDS.toSeconds(milliseconds);
+        int duration = (int)TimeUnit.MILLISECONDS.toSeconds(milliseconds);
         //TODO: get the actual location
         String location = "Canyon Road, Dhahran";
         Video newVideo = new Video(0, title, videoFileName, duration, location, false);
-        SqlDatabase database = new VideoBaseHelper(getActivity()).getWritableDatabase();
+        SQLiteDatabase database = new VideoBaseHelper(this).getWritableDatabase();
         VideoBaseHelper.addVideo(newVideo, database);
     }
 
@@ -415,7 +419,7 @@ public class CaptureService extends Service
      * @param fileName the fileName for the file whose path needs to be retrieved
      * @return full path of specified fileName
      */
-    private String getVideoFilePath(String fileName)
+    private String getVideoFilePath(String fileName, Context context)
     {
         final File dir = context.getExternalFilesDir(Environment.DIRECTORY_DCIM);
         return (dir == null ? "" : (dir.getAbsolutePath() + "/CarWatcher/")) + fileName;
