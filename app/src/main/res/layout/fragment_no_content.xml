@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center|center"
+    android:orientation="vertical"
+    android:weightSum="100"
+    >
+    <ImageView
+        android:id="@+id/no_content_imageview"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:src="@drawable/dashcam"
+        />
+    <TextView
+        android:id="@+id/no_content_prompt_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:maxLines="2"
+        android:scrollHorizontally="false"
+        tools:text="@string/no_captured_videos"
+        android:textColor="@color/darkGrey"
+        android:textSize="16sp"
+        />
+    <Button
+        android:id="@+id/no_content_fix_button"
+        android:layout_height="33dip"
+        android:layout_width="185dip"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/no_content_button"
+        android:textSize="14sp"
+        android:textColor="@color/white"
+        android:text="Capture"
+        />
+</LinearLayout>

@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">CarWatcher</string>
+    <string name="navigation_captured">Captured</string>
+    <string name="navigation_submitted">Submitted</string>
+    <string name="navigation_profile">Profile</string>
+    <string name="no_captured_videos">You have not captured any videos yet. Use a connected flic button to start capturing.</string>
+    <string name="no_submitted_videos">You have not submitted any videos yet</string>
+</resources>
