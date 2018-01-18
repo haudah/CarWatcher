@@ -4,5 +4,11 @@
     <string name="navigation_submitted">Submitted</string>
     <string name="navigation_profile">Profile</string>
     <string name="no_captured_videos">You have not captured any videos yet. Use a connected flic button to start capturing.</string>
-    <string name="no_submitted_videos">You have not submitted any videos yet</string>
+    <string name="no_submitted_videos">You have not submitted any videos yet. Press and hold one of your captured videos to submit.</string>
+    <string name="missing_video_title">Missing Video File</string>
+    <string name="missing_video_message">The video file appears to be missing. Would you like to delete this entry?</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

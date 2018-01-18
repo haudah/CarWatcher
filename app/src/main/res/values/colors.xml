@@ -7,4 +7,7 @@
     <color name="bluishGrey">#EAECEF</color>
     <color name="lightBlue">#2dbbf1</color>
     <color name="darkGrey">#67758E</color>
+    <color name="transparentGrey">#AA4F4F4F</color>
+    <color name="green">@android:color/holo_green_light</color>
+    <color name="red">@android:color/holo_red_light</color>
 </resources>

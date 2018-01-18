@@ -1,8 +1,11 @@
 package com.aramco.carwatcher;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.File;
 
-public class Video
+public class Video implements Parcelable
 {
     private long id;
     private String title;
@@ -69,4 +72,46 @@ public class Video
     {
         return location;
     }
+
+    //PARCELABLE IMPLEMENTATION
+    @Override
+    public void writeToParcel(Parcel dest, int flags)
+    {
+        dest.writeLong(id);
+        dest.writeString(title);
+        dest.writeString(fileName);
+        dest.writeInt(duration);
+        dest.writeInt((submitted)? 1 : 0);
+        dest.writeString(location);
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator()
+    {
+        public Video createFromParcel(Parcel in)
+        {
+            return new Video(in);
+        }
+
+        public Video[] newArray(int size)
+        {
+            return new Video[size];
+        }
+    };
+
+    public Video(Parcel source)
+    {
+        id = source.readLong();
+        title = source.readString();
+        fileName = source.readString();
+        duration = source.readInt();
+        submitted = source.readInt() != 0;
+        location = source.readString();
+    }
+
+    @Override
+    public int describeContents()
+    {
+        return 0;
+    }
+    //DO NOT ADD ANYTHING AFTER PARCELABLE IMPLEMENTATION
 }

@@ -2,100 +2,119 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:orientation="horizontal"
     android:layout_height="wrap_content"
+    android:layout_width="match_parent"
     android:layout_margin="6dp"
+    android:weightSum="100"
     >
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:weightSum="100"
-        >
-        <ImageView
-            android:id="@+id/list_item_video_thumbnail_imageview"
-            android:layout_width="0dp"
-            android:layout_height="100dp"
-            android:layout_weight="35"
-            android:scaleType="fitXY"
-            android:padding="6dp"
-            android:src="@drawable/video_placeholder"
-            />
-        <LinearLayout
-            android:orientation="vertical"
+    <ImageView
+        android:id="@+id/list_item_video_thumbnail_imageview"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:layout_weight="35"
+        android:scaleType="fitXY"
+        android:padding="6dp"
+        android:src="@drawable/video_placeholder"
+        />
+        <RelativeLayout
             android:layout_width="0dp"
             android:layout_weight="65"
-            android:layout_height="90dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:padding="4dp"
             >
-            <RelativeLayout 
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="4dp" >
-                <TextView
-                    android:id="@+id/list_item_video_name_textview"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:textSize="16dp"
-                    android:textAllCaps="true"
-                    android:layout_marginLeft="4dp"
-                    android:layout_marginTop="4dp"
-                    tools:text="Video Name"
+            <TextView
+                android:id="@+id/list_item_video_name_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="16dp"
+                android:textAllCaps="true"
+                android:layout_marginLeft="4dp"
+                android:layout_marginTop="4dp"
+                tools:text="Video Name"
+                />
+            <LinearLayout
+                android:id="@+id/list_item_clock_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/list_item_video_name_textview"
+                android:layout_marginTop="4dp"
+                android:layout_marginLeft="6dp"
+                >
+                <ImageView
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_gravity="center_vertical"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/ic_timer_dark_blue"
                     />
-                <LinearLayout
-                    android:id="@+id/list_item_clock_container"
+                <TextView
+                    android:id="@+id/list_item_video_duration_textview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/list_item_video_name_textview"
-                    android:layout_marginTop="6dp"
-                    android:layout_marginLeft="6dp"
-                    >
-                    <ImageView
-                        android:id="@+id/list_item_clock_imageview"
-                        android:layout_width="15dp"
-                        android:layout_height="15dp"
-                        android:layout_gravity="center_vertical"
-
-                        android:scaleType="fitXY"
-                        android:src="@drawable/ic_timer_dark_blue"
-                        />
-                    <TextView
-                        android:id="@+id/list_item_video_duration_textview"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:textAllCaps="false"
-                        android:layout_marginLeft="4dp"
-                        tools:text="00m:00s"
-                        />
-                </LinearLayout>
-                <LinearLayout
+                    android:layout_gravity="center_vertical"
+                    android:textAllCaps="false"
+                    android:layout_marginLeft="4dp"
+                    tools:text="00m:00s"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/list_item_location_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/list_item_clock_container"
+                android:layout_marginTop="2dp"
+                android:layout_marginLeft="6dp"
+                >
+                <ImageView
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_gravity="center_vertical"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/ic_location_dark_blue"
+                    />
+                <TextView
+                    android:id="@+id/list_item_video_location_textview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/list_item_clock_container"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginLeft="6dp"
-                    >
-                    <ImageView
-                        android:id="@+id/list_item_location_imageview"
-                        android:layout_width="15dp"
-                        android:layout_height="15dp"
-                        android:layout_gravity="center_vertical"
-                        android:scaleType="fitXY"
-                        android:src="@drawable/ic_location_dark_blue"
-                        />
-                    <TextView
-                        android:id="@+id/list_item_video_location_textview"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="4dp"
-                        tools:text="Prince Faisal St., Dhahran"
-                        />
-                </LinearLayout>
-            </RelativeLayout>
-        </LinearLayout>
-    </LinearLayout>
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="4dp"
+                    tools:text="Prince Faisal St., Dhahran"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/list_item_location_container"
+                android:layout_marginTop="2dp"
+                android:layout_marginLeft="6dp"
+                >
+                <ImageView
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_gravity="center_vertical"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/ic_upload_dark_blue"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="4dp"
+                    tools:text="Submitted:"
+                    />
+                <TextView
+                    android:id="@+id/list_item_video_submitted_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="4dp"
+                    android:textColor="@android:color/holo_green_light"
+                    android:textAllCaps="true"
+                    tools:text="Yes"
+                    />
+            </LinearLayout>
+        </RelativeLayout>
 </LinearLayout>
-

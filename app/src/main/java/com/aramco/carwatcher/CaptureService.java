@@ -355,11 +355,11 @@ public class CaptureService extends Service
         mediaRecorder.stop();
         mediaRecorder.reset();
         //if all went well, add the new video file to the DB
-        String title = new SimpleDateFormat("yyyy/MM/dd-HH:mm").format(new Date());
+        String title = new SimpleDateFormat("yyyy/MM/dd - HH:mm").format(new Date());
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         mmr.setDataSource(getVideoFilePath(videoFileName, this));
         int milliseconds = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-        int duration = (int)TimeUnit.MILLISECONDS.toSeconds(milliseconds);
+        int duration = milliseconds / 1000;
         //TODO: get the actual location
         String location = "Canyon Road, Dhahran";
         Video newVideo = new Video(0, title, videoFileName, duration, location, false);
@@ -419,7 +419,7 @@ public class CaptureService extends Service
      * @param fileName the fileName for the file whose path needs to be retrieved
      * @return full path of specified fileName
      */
-    private String getVideoFilePath(String fileName, Context context)
+    public static String getVideoFilePath(String fileName, Context context)
     {
         final File dir = context.getExternalFilesDir(Environment.DIRECTORY_DCIM);
         return (dir == null ? "" : (dir.getAbsolutePath() + "/CarWatcher/")) + fileName;

@@ -96,13 +96,74 @@ public class VideoBaseHelper extends SQLiteOpenHelper
      * @param video the video to be added to the database
      * @param database the database instance to which the video should be added
      */
-    public static void addVideo(Video video, SQLiteDatabase database)
+    public static boolean addVideo(Video video, SQLiteDatabase database)
     {
         ContentValues values = getContentValues(video);
         long id = database.insert(VideoTable.NAME, null, values);
-        //after inserting into the db, be sure to update the video's id
-        //with the one used in the table
-        video.setId(id);
+        if (id != -1)
+        {
+            //after inserting into the db, be sure to update the video's id
+            //with the one used in the table
+            video.setId(id);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Submits a video to the virtual backend.
+     */
+    public static boolean submitVideos(List<Video> videos, SQLiteDatabase database)
+    {
+        //just update the row items in the database with
+        StringBuilder whereClause = new StringBuilder();
+        whereClause.append("_id=?");
+        //for each additional video after first, tack on a OR
+        for (int i = 1; i < videos.size(); i++)
+        {
+            whereClause.append(" OR _id=?");
+        }
+        //content values that just updates the submitted column
+        ContentValues values = new ContentValues();
+        values.put(VideoTable.Cols.SUBMITTED, 1);
+        String[] whereArgs = videos.toArray(new String[videos.size()]);
+        return database.update(VideoTable.NAME, values, whereClause.toString(), whereArgs) == videos.size();
+    }
+
+    /**
+     * Removes the specified videos from the database.
+     *
+     * @param videos the videos to be removed from the database.
+     * @param database the database instance from which the videos should be removed
+     */
+    public static boolean removeVideos(List<Video> videos, SQLiteDatabase database)
+    {
+        StringBuilder whereClause = new StringBuilder();
+        whereClause.append("_id=?");
+        //for each additional video after first, tack on a OR
+        for (int i = 1; i < videos.size(); i++)
+        {
+            whereClause.append(" OR _id=?");
+        }
+        String[] whereArgs = new String[videos.size()];
+        for (int i = 0; i < videos.size(); i++)
+        {
+            whereArgs[i] = Long.toString(videos.get(i).getId());
+        }
+        return database.delete(VideoTable.NAME, whereClause.toString(), whereArgs) == videos.size();
+    }
+
+    /**
+     * Removes the specified video from the database.
+     *
+     * @param video the video to be removed from the database.
+     * @param database the database instance from which the video should be removed
+     */
+    public static boolean removeVideo(Video video, SQLiteDatabase database)
+    {
+        List<Video> videos = new ArrayList<Video>();
+        videos.add(video);
+        return removeVideos(videos, database);
     }
 
     /**
