@@ -27,7 +27,20 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <service android:name=".CaptureService" />
+        <receiver
+            android:name=".CaptureReceiver"
+            android:enabled="true"
+            android:exported="true"
+            >
+            <intent-filter>
+                <action android:name="com.aramco.carwatcher.TOGGLECAPTURE" />
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </receiver>
+        <service
+            android:name=".CaptureService"
+            android:enabled="true"
+            />
     </application>
 
 </manifest>

@@ -7,8 +7,23 @@
     <string name="no_submitted_videos">You have not submitted any videos yet. Press and hold one of your captured videos to submit.</string>
     <string name="missing_video_title">Missing Video File</string>
     <string name="missing_video_message">The video file appears to be missing. Would you like to delete this entry?</string>
+    <string name="delete_videos_title">Delete videos</string>
+    <string name="delete_videos_message">Are you sure you want to delete these %d videos?</string>
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="capture">Capture</string>
+    <string name="stop_capturing">Stop Capturing</string>
+    <string name="list_item_submitted">Submitted: </string>
+    <string name="notify_capturing_title">Capturing CarWatcher video</string>
+    <string name="notify_capturing_text">Touch to stop capturing</string>
+    <string name="notify_channel_name">CarWatcher Notifications</string>
+    <string name="notify_channel_description">Notification channel for notifications sent from the CarWatcher application</string>
+    <string name="delete_associated_media">Delete associated media files?</string>
+    <string name="logout">Log Out</string>
+    <string name="profile_captured">Captured</string>
+    <string name="profile_submitted">Submitted</string>
+    <string name="profile_acted_upon">Acted Upon</string>
+    <string name="profile_processing">Processing</string>
 </resources>

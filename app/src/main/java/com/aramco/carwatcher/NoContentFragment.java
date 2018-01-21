@@ -1,41 +1,13 @@
 package com.aramco.carwatcher;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.SurfaceTexture;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CameraMetadata;
-import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.params.StreamConfigurationMap;
-import android.media.MediaRecorder;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.util.Size;
-import android.util.SparseIntArray;
 import android.view.LayoutInflater;
-import android.view.Surface;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -50,6 +22,8 @@ public class NoContentFragment extends Fragment
     private TextView promptTextView;
     //the resolution button
     private Button fixButton;
+    //true when there is an active capture session
+    private boolean capturing;
 
     //list of reasons for this no content fragment being shown
     public enum Reason
@@ -87,6 +61,7 @@ public class NoContentFragment extends Fragment
         {
             reason = (Reason)getArguments().getSerializable(ARG_REASON);
         }
+        capturing = false;
     }
 
     @Override
@@ -115,13 +90,27 @@ public class NoContentFragment extends Fragment
             @Override
             public void onClick(View v)
             {
-                Intent intent = CaptureService.newIntent(getActivity());
-                getActivity().startService(intent);
+                //same intent is used for capture/stop capturing
+                //Intent intent = CaptureService.newIntent(getActivity());
+                //getActivity().startService(intent);
+                Intent intent = new Intent();
+                intent.setAction("com.aramco.carwatcher.TOGGLECAPTURE");
+                getActivity().sendBroadcast(intent);
+                if (!capturing)
+                {
+                    ((Button)v).setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_record_red, 0, 0, 0);
+                    ((Button)v).setText(R.string.stop_capturing);
+                    capturing = true;
+                }
+                else
+                {
+                    ((Button)v).setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    ((Button)v).setText(R.string.capture);
+                    capturing = false;
+                }
             }
         });
 
         return v;
     }
-
-    //FILE STARTS HERE
 }

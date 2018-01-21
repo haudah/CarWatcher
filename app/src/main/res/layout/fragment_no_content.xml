@@ -37,6 +37,6 @@
         android:background="@drawable/no_content_button"
         android:textSize="14sp"
         android:textColor="@color/white"
-        android:text="Capture"
+        android:text="@string/capture"
         />
 </LinearLayout>

@@ -42,17 +42,25 @@ public class VideoBaseHelper extends SQLiteOpenHelper
      * of videos that appear in a single page.
      *
      * @param pageNumber the page number for the videos to be returned
+     * @param videosPerPage how many videos are on a single results page
+     * @param database the database from which to fetch videos
+     * @param submittedOnly whether to return only submitted videos
      * @return a list of videos on the specified page
      */
-    public static List<Video> getVideos(int pageNumber, int videosPerPage, SQLiteDatabase database)
+    public static List<Video> getVideos(int pageNumber, int videosPerPage, SQLiteDatabase database, boolean submittedOnly)
     {
         List<Video> videos = new ArrayList<Video>(videosPerPage);
         String limit = String.valueOf(videosPerPage);
         String offset = String.valueOf(videosPerPage * pageNumber);
+        String whereClause = null;
+        if (submittedOnly)
+        {
+            whereClause = "submitted != 0";
+        }
         Cursor cursor = database.query(
                 VideoTable.NAME,
                 null, //return all columns
-                null, //return all rows
+                whereClause, //return all rows
                 null, //return all rows
                 null, //no grouping
                 null, //no grouping
@@ -123,10 +131,14 @@ public class VideoBaseHelper extends SQLiteOpenHelper
         {
             whereClause.append(" OR _id=?");
         }
+        String[] whereArgs = new String[videos.size()];
+        for (int i = 0; i < videos.size(); i++)
+        {
+            whereArgs[i] = Long.toString(videos.get(i).getId());
+        }
         //content values that just updates the submitted column
         ContentValues values = new ContentValues();
         values.put(VideoTable.Cols.SUBMITTED, 1);
-        String[] whereArgs = videos.toArray(new String[videos.size()]);
         return database.update(VideoTable.NAME, values, whereClause.toString(), whereArgs) == videos.size();
     }
 

@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,6 +18,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -82,11 +85,16 @@ public class VideoListFragment extends Fragment
         database = new VideoBaseHelper(getActivity()).getWritableDatabase();
 
         //get the list of videos from the video database
-        videos = VideoBaseHelper.getVideos(0, RESULTS_PER_PAGE, database);
+        videos = VideoBaseHelper.getVideos(0, RESULTS_PER_PAGE, database, submittedOnly);
         //if there are no videos in the list, show the NoContentFragment
         if (videos.size() == 0)
         {
-            ((MainActivity)getActivity()).showNoContent(NoContentFragment.Reason.NO_CAPTURED_VIDEOS);
+            NoContentFragment.Reason reason = NoContentFragment.Reason.NO_CAPTURED_VIDEOS;
+            if (submittedOnly)
+            {
+                reason = NoContentFragment.Reason.NO_SUBMITTED_VIDEOS;
+            }
+            ((MainActivity)getActivity()).showNoContent(reason);
             return;
         }
         //initialize set of highlighted videos
@@ -110,20 +118,18 @@ public class VideoListFragment extends Fragment
     {
         switch (item.getItemId())
         {
+            case android.R.id.home:
+                //back button signals cancelled highlighting
+                stopHighlighting(0);
+                return true;
             case R.id.menu_item_delete_video:
-                //delete the video files first
-                for (Video v : highlightedVideos)
-                {
-                    //get the full path for the video
-                    String videoPath = CaptureService.getVideoFilePath(v.getFileName(), getActivity());
-                    File file = new File(videoPath);
-                    if (file.exists())
-                    {
-                        file.delete();
-                    }
-                }
-                VideoBaseHelper.removeVideos(new ArrayList<Video>(highlightedVideos), database);
-                stopHighlighting(1);
+                FragmentManager fm = getFragmentManager();
+                DeleteVideosFragment fragment =
+                    DeleteVideosFragment.newInstance(new ArrayList<Video>(highlightedVideos));
+                //VideoBaseHelper.removeVideos(new ArrayList<Video>(highlightedVideos), database);
+                fragment.setTargetFragment(VideoListFragment.this, 0);
+                fragment.show(fm, "delete_videos_fragment");
+                //stopHighlighting(1);
                 return true;
             case R.id.menu_item_submit_video:
                 VideoBaseHelper.submitVideos(new ArrayList<Video>(highlightedVideos), database);
@@ -189,6 +195,19 @@ public class VideoListFragment extends Fragment
             int seconds = v.getDuration() - minutes * 60;
             durationTextView.setText(String.format("%02dm:%02ds", minutes, seconds));
             locationTextView.setText(v.getLocation());
+            //get full path of file using filename
+            String videoFilePath =
+                CaptureService.getVideoFilePath(v.getFileName(), getActivity());
+            //check if file exists, and if not, offer to delete entry
+            File videoFile = new File(videoFilePath);
+            if (videoFile.exists())
+            {
+                //if the video file exists, show its thumbnail
+                GlideApp
+                    .with(getActivity().getApplicationContext())
+                    .load(Uri.fromFile(videoFile))
+                    .into(thumbnailImageView);
+            }
             //if video was submitted updated submission text and color
             if (v.isSubmitted())
             {
@@ -230,6 +249,7 @@ public class VideoListFragment extends Fragment
                 File videoFile = new File(videoFilePath);
                 if (!videoFile.exists())
                 {
+                    //TODO: offer to delete entry
                 }
                 else
                 {
@@ -268,6 +288,7 @@ public class VideoListFragment extends Fragment
         {
             highlighting = true;
             getActivity().invalidateOptionsMenu();
+            ((MainActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         //if this item isn't highlighted
         if (!highlightedVideos.contains(video))
@@ -291,11 +312,11 @@ public class VideoListFragment extends Fragment
      *
      * @param action 0 indicates cancellation, 1 indicates deletion, 2 indicates submission
      */
-    private void stopHighlighting(int action)
+    public void stopHighlighting(int action)
     {
         if (action == 0)
         {
-            //do nothing
+            //nothing to do
         }
         else if (action == 1)
         {
@@ -304,16 +325,21 @@ public class VideoListFragment extends Fragment
                 //remove from the main list
                 videos.remove(v);
             }
-            //notify the adapter that certain items have been removed
-            adapter.notifyDataSetChanged();
+            //if there are no more videos, show no content fragment
+            if (videos.size() == 0)
+            {
+                ((MainActivity)getActivity()).showNoContent(NoContentFragment.Reason.NO_CAPTURED_VIDEOS);
+            }
         }
         else if (action == 2)
         {
-            //notify the adapter that certain items have been modified
-            adapter.notifyDataSetChanged();
+            //nothing to do
         }
+        adapter.notifyDataSetChanged();
         highlighting = false;
         highlightedVideos.clear();
+        ((MainActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        getActivity().invalidateOptionsMenu();
     }
 
     //the adapter between the view holder and the recycler view
@@ -346,6 +372,40 @@ public class VideoListFragment extends Fragment
         public int getItemCount()
         {
             return videos.size();
+        }
+    }
+
+    //this function should be called to have the fragment refresh the list of videos, (for e.g. if
+    //a new video was added by the capture service)
+    public void refreshList()
+    {
+        //TODO: terribly inefficient, broadcast should include info on new video and only that
+        //should be added
+        //clear the list
+        videos.clear();
+        //get the current list from the database
+        List<Video> newVideos = VideoBaseHelper.getVideos(0, RESULTS_PER_PAGE, database, submittedOnly);
+        for (Video v : newVideos)
+        {
+            videos.add(v);
+        }
+        adapter.notifyDataSetChanged();
+    }
+
+    //this function is called from the main activity to check if a back button press should
+    //be handled in the fragment (and handle it if so). If the VideoListFragment is not in
+    //highlighting mode, the back button will not be handled here, and the function should
+    //return false to indicate that the activity should handle it
+    public boolean onBackPressed()
+    {
+        if (highlighting)
+        {
+            stopHighlighting(0);
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 }

@@ -1,10 +1,15 @@
 package com.aramco.carwatcher;
 
 import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -16,12 +21,17 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -38,11 +48,13 @@ import java.util.concurrent.TimeUnit;
 
 public class CaptureService extends Service
 {
+    private static final String CAR_WATCHER_ACTION = "com.aramco.carwatcher.CaptureService.BIND";
     private static final int SENSOR_ORIENTATION_DEFAULT_DEGREES = 90;
     private static final int SENSOR_ORIENTATION_INVERSE_DEGREES = 270;
     private static final SparseIntArray DEFAULT_ORIENTATIONS = new SparseIntArray();
     private static final SparseIntArray INVERSE_ORIENTATIONS = new SparseIntArray();
     private static final String TAG = "CaptureService";
+    public static final String ACTION_NEW_VIDEO = "com.aramco.carwatcher.CHECK_VIDEOS";
     //the opened camera device
     private CameraDevice cameraDevice;
     //the media recorder that's going to be capturing video
@@ -87,7 +99,10 @@ public class CaptureService extends Service
      */
     public static Intent newIntent(Context context)
     {
-        return new Intent(context, CaptureService.class);
+        Intent intent = new Intent(context, CaptureService.class);
+        //Intent intent = new Intent();
+        //intent.setComponent(new ComponentName("com.aramco.carwatcher", "com.aramco.carwatcher.CaptureService"));
+        return intent;
     }
 
     @Override
@@ -310,6 +325,36 @@ public class CaptureService extends Service
         }
 
         isRecordingVideo = true;
+        //show the notification
+        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        Resources resources = getResources();
+        //channel id
+        String channelId = "carwatcher_channel";
+        //user-visible name of the channel
+        CharSequence name = resources.getString(R.string.notify_channel_name);
+        //user-visible description of the channel
+        String description = resources.getString(R.string.notify_channel_description);
+        int importance = NotificationManager.IMPORTANCE_HIGH;
+        //we only need to create a channel on API > 26
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            NotificationChannel channel = new NotificationChannel(channelId, name, importance);
+            channel.setDescription(description);
+            channel.enableVibration(false);
+            //get the Uri for the default notification
+            Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        Notification notification = new NotificationCompat.Builder(this, channelId)
+            .setTicker(resources.getString(R.string.notify_capturing_title))
+            .setSmallIcon(R.drawable.ic_shutter_dark_grey)
+            .setContentTitle(resources.getString(R.string.notify_capturing_title))
+            .setContentText(resources.getString(R.string.notify_capturing_text))
+            .setAutoCancel(true)
+            .build();
+
+        notificationManager.notify(0, notification);
 
         try
         {
@@ -365,6 +410,8 @@ public class CaptureService extends Service
         Video newVideo = new Video(0, title, videoFileName, duration, location, false);
         SQLiteDatabase database = new VideoBaseHelper(this).getWritableDatabase();
         VideoBaseHelper.addVideo(newVideo, database);
+        //when done creating a video, send a broadcast intent for interested listeners
+        sendBroadcast(new Intent(ACTION_NEW_VIDEO));
     }
 
     /**
