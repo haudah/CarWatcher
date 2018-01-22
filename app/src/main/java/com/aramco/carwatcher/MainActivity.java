@@ -47,8 +47,6 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //set subtitle
-        getSupportActionBar().setSubtitle("Stay Safe");
         //show the app icon in the action bar
         //getSupportActionBar().setDisplayShowHomeEnabled(true);
         //getSupportActionBar().setLogo(R.drawable.ic_car_white);
@@ -107,7 +105,7 @@ public class MainActivity extends AppCompatActivity
                                 selectedFragment = VideoListFragment.newInstance(true);
                                 break;
                             case R.id.navigation_profile:
-                                //not implemented yet
+                                selectedFragment = ProfileFragment.newInstance();
                                 break;
                         }
                         if (selectedFragment != null)

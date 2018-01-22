@@ -18,6 +18,8 @@
     <string name="list_item_submitted">Submitted: </string>
     <string name="notify_capturing_title">Capturing CarWatcher video</string>
     <string name="notify_capturing_text">Touch to stop capturing</string>
+    <string name="notify_done_capturing_title">Captured a CarWatcher video</string>
+    <string name="notify_done_capturing_text">Touch to play</string>
     <string name="notify_channel_name">CarWatcher Notifications</string>
     <string name="notify_channel_description">Notification channel for notifications sent from the CarWatcher application</string>
     <string name="delete_associated_media">Delete associated media files?</string>
@@ -26,4 +28,8 @@
     <string name="profile_submitted">Submitted</string>
     <string name="profile_acted_upon">Acted Upon</string>
     <string name="profile_processing">Processing</string>
+    <string name="not_configured">Not Configured</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

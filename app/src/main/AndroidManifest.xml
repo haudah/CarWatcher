@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.aramco.carwatcher"
-    >
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.aramco.carwatcher">
+
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -22,6 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <receiver android:name=".BootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -30,17 +31,19 @@
         <receiver
             android:name=".CaptureReceiver"
             android:enabled="true"
-            android:exported="true"
-            >
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.aramco.carwatcher.TOGGLECAPTURE" />
-                <category android:name="android.intent.category.DEFAULT"/>
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
+
         <service
             android:name=".CaptureService"
-            android:enabled="true"
-            />
+            android:enabled="true" />
+
+        <activity android:name=".SettingsActivity"></activity>
     </application>
 
 </manifest>

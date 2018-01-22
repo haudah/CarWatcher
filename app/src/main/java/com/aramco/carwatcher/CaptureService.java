@@ -28,6 +28,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
@@ -78,6 +79,12 @@ public class CaptureService extends Service
     private CaptureRequest.Builder previewBuilder;
     //we need to record the file name for the database insertion
     private String videoFileName;
+    //we need a notification id to update the notification upon completion
+    private int notifyId = 1;
+    //keep reference to notification builder for updating notification
+    private NotificationCompat.Builder notifyBuilder;
+    //and the notification manager as well
+    private NotificationManager notifyManager;
 
     @Override
     public void onCreate()
@@ -326,7 +333,7 @@ public class CaptureService extends Service
 
         isRecordingVideo = true;
         //show the notification
-        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        notifyManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         Resources resources = getResources();
         //channel id
         String channelId = "carwatcher_channel";
@@ -335,26 +342,27 @@ public class CaptureService extends Service
         //user-visible description of the channel
         String description = resources.getString(R.string.notify_channel_description);
         int importance = NotificationManager.IMPORTANCE_HIGH;
+        //get the Uri for the default notification sound
+        Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         //we only need to create a channel on API > 26
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
             NotificationChannel channel = new NotificationChannel(channelId, name, importance);
             channel.setDescription(description);
             channel.enableVibration(false);
-            //get the Uri for the default notification
-            Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            notificationManager.createNotificationChannel(channel);
+            notifyManager.createNotificationChannel(channel);
         }
 
-        Notification notification = new NotificationCompat.Builder(this, channelId)
-            .setTicker(resources.getString(R.string.notify_capturing_title))
+        notifyBuilder = new NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_shutter_dark_grey)
             .setContentTitle(resources.getString(R.string.notify_capturing_title))
             .setContentText(resources.getString(R.string.notify_capturing_text))
-            .setAutoCancel(true)
-            .build();
+            .setSound(uri)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true);
 
-        notificationManager.notify(0, notification);
+        notifyManager.notify(notifyId, notifyBuilder.build());
+        wakeScreen(5);
 
         try
         {
@@ -412,6 +420,13 @@ public class CaptureService extends Service
         VideoBaseHelper.addVideo(newVideo, database);
         //when done creating a video, send a broadcast intent for interested listeners
         sendBroadcast(new Intent(ACTION_NEW_VIDEO));
+        Resources resources = getResources();
+        //and update the notification
+        notifyBuilder
+            .setContentTitle(resources.getString(R.string.notify_done_capturing_title))
+            .setContentText(resources.getString(R.string.notify_done_capturing_text));
+        notifyManager.notify(notifyId, notifyBuilder.build());
+        wakeScreen(5);
     }
 
     /**
@@ -470,5 +485,24 @@ public class CaptureService extends Service
     {
         final File dir = context.getExternalFilesDir(Environment.DIRECTORY_DCIM);
         return (dir == null ? "" : (dir.getAbsolutePath() + "/CarWatcher/")) + fileName;
+    }
+
+    /**
+     * This function can be used to wake the screen for the specified number of seconds.
+     *
+     * @param seconds the number of seconds to keep the screen awake
+     */
+    private void wakeScreen(int seconds)
+    {
+        PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);
+        boolean isScreenOn = pm.isScreenOn();
+        if (!isScreenOn)
+        {
+            PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP |
+                    PowerManager.ON_AFTER_RELEASE,"CaptureScreenLocak");
+            wl.acquire(seconds * 1000);
+            PowerManager.WakeLock wl_cpu = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"CaptureCoreLock");
+            wl_cpu.acquire(seconds * 1000);
+        }
     }
 }
