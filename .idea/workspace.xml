@@ -11,7 +11,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8ff6026c-69ed-4656-8640-3d96dced43dc" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/.SettingsActivity.java.swp" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/4.1/fileHashes/fileHashes.bin" afterPath="$PROJECT_DIR$/.gradle/4.1/fileHashes/fileHashes.bin" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/4.1/fileHashes/fileHashes.lock" afterPath="$PROJECT_DIR$/.gradle/4.1/fileHashes/fileHashes.lock" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/4.1/javaCompile/classAnalysis.bin" afterPath="$PROJECT_DIR$/.gradle/4.1/javaCompile/classAnalysis.bin" />
@@ -20,13 +19,9 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/4.1/taskHistory/fileSnapshots.bin" afterPath="$PROJECT_DIR$/.gradle/4.1/taskHistory/fileSnapshots.bin" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/4.1/taskHistory/taskHistory.bin" afterPath="$PROJECT_DIR$/.gradle/4.1/taskHistory/taskHistory.bin" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/4.1/taskHistory/taskHistory.lock" afterPath="$PROJECT_DIR$/.gradle/4.1/taskHistory/taskHistory.lock" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/.CaptureService.java.swp" afterPath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/.CaptureService.java.swp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureReceiver.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureReceiver.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/MainActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/MainActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/SettingsActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/SettingsActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_settings.xml" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_settings.xml" />
     </list>
     <ignored path="$PROJECT_DIR$/build/classes/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -92,8 +87,8 @@
       <file leaf-file-name="CaptureService.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="269">
-              <caret line="570" column="34" lean-forward="false" selection-start-line="570" selection-start-column="34" selection-end-line="570" selection-end-column="34" />
+            <state relative-caret-position="331">
+              <caret line="614" column="37" lean-forward="true" selection-start-line="614" selection-start-column="37" selection-end-line="614" selection-end-column="37" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -175,13 +170,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>location_imag</find>
-      <find>color</find>
-      <find>onclick</find>
-      <find>onstart</find>
-      <find>send</find>
-      <find>stophigh</find>
-      <find>getsupp</find>
       <find>glide</find>
       <find>removev</find>
       <find>onbackp</find>
@@ -205,6 +193,13 @@
       <find>rotation_interval</find>
       <find>interval</find>
       <find>rotaterec</find>
+      <find>mediarecorder.</find>
+      <find>prepare(</find>
+      <find>setupmedia</find>
+      <find>onstart</find>
+      <find>stopReco</find>
+      <find>start()</find>
+      <find>secondaryrecorder.start</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -3018,7 +3013,7 @@
       <option name="ACTIVITY_CLASS" value="" />
       <method>
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1516706685704" />
+        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1516711497983" />
       </method>
     </configuration>
     <configuration default="true" type="AndroidTestRunConfigurationType" factoryName="Android Instrumented Tests">
@@ -3066,7 +3061,7 @@
       </Profilers>
       <method>
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1516706685704" />
+        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1516711497983" />
       </method>
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
@@ -3249,7 +3244,7 @@
       <option name="ACTIVITY_CLASS" value="" />
       <method>
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1516706685705" />
+        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1516711497985" />
       </method>
     </configuration>
     <list size="1">
@@ -3331,18 +3326,6 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java</url>
-          <line>410</line>
-          <properties />
-          <option name="timeStamp" value="25" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java</url>
-          <line>128</line>
-          <properties />
-          <option name="timeStamp" value="28" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/NoContentFragment.java</url>
           <line>97</line>
           <properties />
@@ -3372,14 +3355,8 @@
           <properties />
           <option name="timeStamp" value="35" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java</url>
-          <line>572</line>
-          <properties />
-          <option name="timeStamp" value="38" />
-        </line-breakpoint>
       </breakpoints>
-      <option name="time" value="39" />
+      <option name="time" value="44" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="app">
@@ -3863,8 +3840,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="269">
-          <caret line="570" column="34" lean-forward="false" selection-start-line="570" selection-start-column="34" selection-end-line="570" selection-end-column="34" />
+        <state relative-caret-position="331">
+          <caret line="614" column="37" lean-forward="true" selection-start-line="614" selection-start-column="37" selection-end-line="614" selection-end-column="37" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

@@ -134,9 +134,9 @@ public class CaptureService extends Service
     public int onStartCommand(Intent intent, int flags, int startId)
     {
         //check if this is for continuous capture
-        boolean continuous = intent.getExtras().getBoolean(EXTRA_CONTINUOUS);
+        continuousCapture = intent.getExtras().getBoolean(EXTRA_CONTINUOUS);
         //if this is an intent for recorder rotation, just rotate and stop
-        if (continuous && intent.hasExtra(EXTRA_ROTATION))
+        if (continuousCapture && intent.hasExtra(EXTRA_ROTATION))
         {
             rotateRecorders();
         }
@@ -151,7 +151,7 @@ public class CaptureService extends Service
                 openCamera();
                 //if its going to run in continuous mode,
                 //schedule a 30-second recorder shift
-                if (continuous)
+                if (continuousCapture)
                 {
                     setAlarm(this, true);
                 }
@@ -260,32 +260,40 @@ public class CaptureService extends Service
     };
 
     /**
-     * This sets up the media recorder with all necessary recording format info.
+     * This sets up the media recorder(s) with all necessary recording format info.
+     *
+     * @param recorder the media recorder to set up
      */
-    private void setUpMediaRecorder() throws IOException
+    private void setUpMediaRecorder(MediaRecorder recorder, String suffix) throws IOException
     {
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        recorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+        recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         //set the recording destination file
-        mediaRecorder.setOutputFile(getVideoFilePath(this));
-        mediaRecorder.setVideoEncodingBitRate(10000000);
-        mediaRecorder.setVideoFrameRate(30);
-        mediaRecorder.setVideoSize(videoSize.getWidth(), videoSize.getHeight());
-        mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+        //if there is a suffix-add it to the end
+        String outputFile = getVideoFilePath(this);
+        if (suffix != null)
+        {
+            outputFile += suffix;
+        }
+        recorder.setOutputFile(getVideoFilePath(this));
+        recorder.setVideoEncodingBitRate(10000000);
+        recorder.setVideoFrameRate(30);
+        recorder.setVideoSize(videoSize.getWidth(), videoSize.getHeight());
+        recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
 
         int rotation = getResources().getConfiguration().orientation;
         switch (sensorOrientation)
         {
             case SENSOR_ORIENTATION_DEFAULT_DEGREES:
-                mediaRecorder.setOrientationHint(DEFAULT_ORIENTATIONS.get(rotation));
+                recorder.setOrientationHint(DEFAULT_ORIENTATIONS.get(rotation));
                 break;
             case SENSOR_ORIENTATION_INVERSE_DEGREES:
-                mediaRecorder.setOrientationHint(INVERSE_ORIENTATIONS.get(rotation));
+                recorder.setOrientationHint(INVERSE_ORIENTATIONS.get(rotation));
                 break;
         }
-        mediaRecorder.prepare();
+        recorder.prepare();
     }
 
     /**
@@ -342,6 +350,7 @@ public class CaptureService extends Service
             }
 
             primaryRecorder = new MediaRecorder();
+            secondaryRecorder = new MediaRecorder();
             mediaRecorder = primaryRecorder;
             manager.openCamera(cameraId, stateCallback, null);
         }
@@ -425,13 +434,28 @@ public class CaptureService extends Service
 
         try
         {
-            setUpMediaRecorder();
+            //if in continuous mode, we also need to set up the secondary recorder
+            if (continuousCapture)
+            {
+                setUpMediaRecorder(primaryRecorder, "-Part1");
+                setUpMediaRecorder(secondaryRecorder, "-Part2");
+            }
+            else
+            {
+                setUpMediaRecorder(primaryRecorder, null);
+            }
             previewBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
             List<Surface> surfaces = new ArrayList<>();
             //the surface that will get recorded
             Surface recorderSurface = mediaRecorder.getSurface();
             surfaces.add(recorderSurface);
             previewBuilder.addTarget(recorderSurface);
+            if (continuousCapture)
+            {
+                recorderSurface = secondaryRecorder.getSurface();
+                surfaces.add(recorderSurface);
+                previewBuilder.addTarget(recorderSurface);
+            }
             //start the capture session
             cameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
                 @Override
@@ -439,8 +463,9 @@ public class CaptureService extends Service
                 {
                     previewSession = cameraCaptureSession;
                     updatePreview();
-                    //once configured, start the actual recording
+                    //once configured, start the actual recording (only on primary)
                     mediaRecorder.start();
+                    //secondaryRecorder.start();
                 }
 
                 @Override
@@ -464,8 +489,19 @@ public class CaptureService extends Service
     private void stopRecordingVideo()
     {
         isRecordingVideo = false;
-        mediaRecorder.stop();
-        mediaRecorder.reset();
+        //if in continuous mode, only stop the currently active recorder
+        //but reset both
+        if (continuousCapture)
+        {
+            secondaryRecorder.stop();
+            secondaryRecorder.reset();
+            //mediaRecorder.reset();
+        }
+        else
+        {
+            mediaRecorder.stop();
+            mediaRecorder.reset();
+        }
         //if all went well, add the new video file to the DB
         String title = new SimpleDateFormat("yyyy/MM/dd - HH:mm").format(new Date());
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
@@ -572,7 +608,13 @@ public class CaptureService extends Service
     {
         Log.i(TAG, "Rotating Recorders");
         rotationCount++;
-        if (rotationCount == 4)
+        if (rotationCount == 2)
+        {
+            primaryRecorder.stop();
+            primaryRecorder.reset();
+            secondaryRecorder.start();
+        }
+        if (rotationCount == 3)
         {
             setAlarm(this, false);
         }
