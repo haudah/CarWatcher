@@ -64,6 +64,11 @@ public class MainActivity extends AppCompatActivity
         {
             permissions.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH)
+                != PackageManager.PERMISSION_GRANTED)
+        {
+            permissions.add(android.Manifest.permission.BLUETOOTH);
+        }
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED)
         {
@@ -234,5 +239,19 @@ public class MainActivity extends AppCompatActivity
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case R.id.menu_item_settings:
+                Intent intent = SettingsActivity.newIntent(MainActivity.this);
+                startActivity(intent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

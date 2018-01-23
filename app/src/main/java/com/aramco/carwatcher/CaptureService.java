@@ -1,9 +1,11 @@
 package com.aramco.carwatcher;
 
+import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,6 +31,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
@@ -55,11 +58,19 @@ public class CaptureService extends Service
     private static final SparseIntArray DEFAULT_ORIENTATIONS = new SparseIntArray();
     private static final SparseIntArray INVERSE_ORIENTATIONS = new SparseIntArray();
     private static final String TAG = "CaptureService";
+    private static final String EXTRA_CONTINUOUS = "EXTRA_CONTINUOUS";
+    private static final String EXTRA_ROTATION = "EXTRA_ROTATION";
+    //the interval (in seconds) for recorder rotation during continuous capture mode
+    private static final long ROTATION_INTERVAL = TimeUnit.SECONDS.toMillis(10);
     public static final String ACTION_NEW_VIDEO = "com.aramco.carwatcher.CHECK_VIDEOS";
     //the opened camera device
     private CameraDevice cameraDevice;
     //the media recorder that's going to be capturing video
+    //points to one of primaryRecorder or secondaryRecorder;
     private MediaRecorder mediaRecorder;
+    //the secondary recorder to be used for continuous capture
+    private MediaRecorder primaryRecorder;
+    private MediaRecorder secondaryRecorder;
     //lock to prevent app from closing before releasing camera access
     private Semaphore cameraLock = new Semaphore(1);
     private Integer sensorOrientation;
@@ -69,6 +80,8 @@ public class CaptureService extends Service
     private HandlerThread backgroundThread;
     //whether or not service is currently recording
     private boolean isRecordingVideo = false;
+    //whether service is running in continuous mode
+    private boolean continuousCapture = false;
     //the UI thread handler
     private Handler uiHandler;
     //the size of the video to capture
@@ -85,6 +98,9 @@ public class CaptureService extends Service
     private NotificationCompat.Builder notifyBuilder;
     //and the notification manager as well
     private NotificationManager notifyManager;
+    //this counter keeps track of how many times the recorders have been rotated
+    //when in continuous mode
+    private int rotationCount = 0;
 
     @Override
     public void onCreate()
@@ -102,11 +118,13 @@ public class CaptureService extends Service
      * Create intents to send work to the CaptureService.
      *
      * @param context the application context.
+     * @param continuous whether the start/stop command is for continuous capture
      * @return an intent that you can send to CaptureService to start/stop recording.
      */
-    public static Intent newIntent(Context context)
+    public static Intent newIntent(Context context, boolean continuous)
     {
         Intent intent = new Intent(context, CaptureService.class);
+        intent.putExtra(EXTRA_CONTINUOUS, continuous);
         //Intent intent = new Intent();
         //intent.setComponent(new ComponentName("com.aramco.carwatcher", "com.aramco.carwatcher.CaptureService"));
         return intent;
@@ -115,23 +133,63 @@ public class CaptureService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        //check if we need to start or stop recording
-        if (!isRecordingVideo)
+        //check if this is for continuous capture
+        boolean continuous = intent.getExtras().getBoolean(EXTRA_CONTINUOUS);
+        //if this is an intent for recorder rotation, just rotate and stop
+        if (continuous && intent.hasExtra(EXTRA_ROTATION))
         {
-            //start the camera's background thread
-            startBackgroundThread();
-            //open the camera for recording
-            openCamera();
+            rotateRecorders();
         }
         else
         {
-            stopRecordingVideo();
-            closeCamera();
-            stopBackgroundThread();
+            //check if we need to start or stop recording
+            if (!isRecordingVideo)
+            {
+                //start the camera's background thread
+                startBackgroundThread();
+                //open the camera for recording
+                openCamera();
+                //if its going to run in continuous mode,
+                //schedule a 30-second recorder shift
+                if (continuous)
+                {
+                    setAlarm(this, true);
+                }
+            }
+            else
+            {
+                stopRecordingVideo();
+                closeCamera();
+                stopBackgroundThread();
+            }
         }
 
         //don't restart this service if it's closed by the OS
         return START_NOT_STICKY;
+    }
+
+    /**
+     * Sets up an alarm that will trigger the recorder rotation during continuous capture mode.
+     *
+     * @param enable whether to setup or terminate the alarm
+     */
+    private void setAlarm(Context context, boolean enable)
+    {
+        Intent i = new Intent(context, CaptureService.class);
+        i.putExtra(EXTRA_ROTATION, true);
+        i.putExtra(EXTRA_CONTINUOUS, true);
+        PendingIntent pi = PendingIntent.getService(context, 0, i, 0);
+        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        if (enable)
+        {
+            alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, 
+                    SystemClock.elapsedRealtime(), ROTATION_INTERVAL, pi);
+        }
+        else
+        {
+            alarmManager.cancel(pi);
+            pi.cancel();
+        }
     }
 
     /**
@@ -283,7 +341,8 @@ public class CaptureService extends Service
                 return;
             }
 
-            mediaRecorder = new MediaRecorder();
+            primaryRecorder = new MediaRecorder();
+            mediaRecorder = primaryRecorder;
             manager.openCamera(cameraId, stateCallback, null);
         }
         catch (CameraAccessException | InterruptedException e)
@@ -503,6 +562,19 @@ public class CaptureService extends Service
             wl.acquire(seconds * 1000);
             PowerManager.WakeLock wl_cpu = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"CaptureCoreLock");
             wl_cpu.acquire(seconds * 1000);
+        }
+    }
+
+    /**
+     * Rotate the recorders so that recording can proceed on a new file.
+     */
+    private void rotateRecorders()
+    {
+        Log.i(TAG, "Rotating Recorders");
+        rotationCount++;
+        if (rotationCount == 4)
+        {
+            setAlarm(this, false);
         }
     }
 }
