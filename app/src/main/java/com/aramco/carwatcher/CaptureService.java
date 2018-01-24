@@ -68,9 +68,6 @@ public class CaptureService extends Service
     //the media recorder that's going to be capturing video
     //points to one of primaryRecorder or secondaryRecorder;
     private MediaRecorder mediaRecorder;
-    //the secondary recorder to be used for continuous capture
-    private MediaRecorder primaryRecorder;
-    private MediaRecorder secondaryRecorder;
     //lock to prevent app from closing before releasing camera access
     private Semaphore cameraLock = new Semaphore(1);
     private Integer sensorOrientation;
@@ -101,17 +98,28 @@ public class CaptureService extends Service
     //this counter keeps track of how many times the recorders have been rotated
     //when in continuous mode
     private int rotationCount = 0;
+    //this will only be true for the first run; it is needed to allow the first
+    //startRecordingVideo to be called after the camera is open
+    private boolean firstRun;
+    //in continuous mode, this is the most recently saved file in the current run
+    private File lastVideoFile = null;
 
     @Override
     public void onCreate()
     {
-        uiHandler = new Handler();
         super.onCreate();
+        firstRun = true;
+        //start the camera's background thread
+        startBackgroundThread();
+        //open the camera for recording
+        openCamera();
     }
 
-    private void runOnUiThread(Runnable runnable)
+    @Override
+    public void onDestroy()
     {
-        uiHandler.post(runnable);
+        closeCamera();
+        stopBackgroundThread();
     }
 
     /**
@@ -121,10 +129,11 @@ public class CaptureService extends Service
      * @param continuous whether the start/stop command is for continuous capture
      * @return an intent that you can send to CaptureService to start/stop recording.
      */
-    public static Intent newIntent(Context context, boolean continuous)
+    public static Intent newIntent(Context context, boolean continuous, boolean continuousRecord)
     {
         Intent intent = new Intent(context, CaptureService.class);
         intent.putExtra(EXTRA_CONTINUOUS, continuous);
+        intent.putExtra(EXTRA_CONTINUOUS_RECORD, continuousRecord);
         //Intent intent = new Intent();
         //intent.setComponent(new ComponentName("com.aramco.carwatcher", "com.aramco.carwatcher.CaptureService"));
         return intent;
@@ -135,33 +144,29 @@ public class CaptureService extends Service
     {
         //check if this is for continuous capture
         continuousCapture = intent.getExtras().getBoolean(EXTRA_CONTINUOUS);
-        //if this is an intent for recorder rotation, just rotate and stop
-        if (continuousCapture && intent.hasExtra(EXTRA_ROTATION))
+        //the continuousRecord flag is what starts and stops the user-requested recording during
+        //a continuous capture
+        boolean continuousRecord = intent.getExtras().getBoolean(EXTRA_CONTINUOUS_RECORD);
+        boolean rotate = intent.getExtras().getBoolean(EXTRA_ROTATE);
+        //check if we need to start or stop recording
+        if (!isRecordingVideo)
         {
-            rotateRecorders();
+            //start the actual recording unless its the firstRun
+            if (!firstRun)
+            {
+                startRecordingVideo();
+            }
+            firstRun = false;
+            //if its going to run in continuous mode,
+            //schedule a 30-second recorder shift
+            if (continuousCapture)
+            {
+                setAlarm(this, true);
+            }
         }
         else
         {
-            //check if we need to start or stop recording
-            if (!isRecordingVideo)
-            {
-                //start the camera's background thread
-                startBackgroundThread();
-                //open the camera for recording
-                openCamera();
-                //if its going to run in continuous mode,
-                //schedule a 30-second recorder shift
-                if (continuousCapture)
-                {
-                    setAlarm(this, true);
-                }
-            }
-            else
-            {
-                stopRecordingVideo();
-                closeCamera();
-                stopBackgroundThread();
-            }
+            stopRecordingVideo(rotate);
         }
 
         //don't restart this service if it's closed by the OS
@@ -238,7 +243,6 @@ public class CaptureService extends Service
         {
             CaptureService.this.cameraDevice = cameraDevice;
             cameraLock.release();
-            //as this is a service, start recording as soon as camera is ready
             startRecordingVideo();
         }
 
@@ -254,8 +258,8 @@ public class CaptureService extends Service
         public void onError(@NonNull CameraDevice cameraDevice, int error)
         {
             cameraLock.release();
-            cameraDevice.close();
-            CaptureService.this.cameraDevice = null;
+            //cameraDevice.close();
+            //CaptureService.this.cameraDevice = null;
         }
     };
 
@@ -340,21 +344,9 @@ public class CaptureService extends Service
             //get the camera sensor orientation
             sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
 
-            // Add permission for camera and let user grant the permission
-            // TODO this is no longer needed since permissions are granted in main activity
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
-                    || ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-            {
-                //cant really do anything from a service if we don't have permission
-                return;
-            }
-
-            primaryRecorder = new MediaRecorder();
-            secondaryRecorder = new MediaRecorder();
-            mediaRecorder = primaryRecorder;
             manager.openCamera(cameraId, stateCallback, null);
         }
-        catch (CameraAccessException | InterruptedException e)
+        catch (CameraAccessException | InterruptedException | SecurityException e)
         {
         }
     }
@@ -398,6 +390,8 @@ public class CaptureService extends Service
         {
             return;
         }
+        //a new media recorder is needed to start each session (dont ask questions)
+        mediaRecorder = new MediaRecorder();
 
         isRecordingVideo = true;
         //show the notification
@@ -434,28 +428,13 @@ public class CaptureService extends Service
 
         try
         {
-            //if in continuous mode, we also need to set up the secondary recorder
-            if (continuousCapture)
-            {
-                setUpMediaRecorder(primaryRecorder, "-Part1");
-                setUpMediaRecorder(secondaryRecorder, "-Part2");
-            }
-            else
-            {
-                setUpMediaRecorder(primaryRecorder, null);
-            }
+            setUpMediaRecorder(mediaRecorder, null);
             previewBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
             List<Surface> surfaces = new ArrayList<>();
             //the surface that will get recorded
             Surface recorderSurface = mediaRecorder.getSurface();
             surfaces.add(recorderSurface);
             previewBuilder.addTarget(recorderSurface);
-            if (continuousCapture)
-            {
-                recorderSurface = secondaryRecorder.getSurface();
-                surfaces.add(recorderSurface);
-                previewBuilder.addTarget(recorderSurface);
-            }
             //start the capture session
             cameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
                 @Override
@@ -465,7 +444,6 @@ public class CaptureService extends Service
                     updatePreview();
                     //once configured, start the actual recording (only on primary)
                     mediaRecorder.start();
-                    //secondaryRecorder.start();
                 }
 
                 @Override
@@ -486,42 +464,53 @@ public class CaptureService extends Service
     /**
      * Stops the video recording process.
      */
-    private void stopRecordingVideo()
+    private void stopRecordingVideo(boolean rotate)
     {
+        try
+        {
+            previewSession.stopRepeating();
+        }
+        catch (CameraAccessException e)
+        {
+        }
         isRecordingVideo = false;
-        //if in continuous mode, only stop the currently active recorder
-        //but reset both
-        if (continuousCapture)
-        {
-            secondaryRecorder.stop();
-            secondaryRecorder.reset();
-            //mediaRecorder.reset();
-        }
-        else
-        {
-            mediaRecorder.stop();
-            mediaRecorder.reset();
-        }
+        mediaRecorder.stop();
+        mediaRecorder.reset();
         //if all went well, add the new video file to the DB
-        String title = new SimpleDateFormat("yyyy/MM/dd - HH:mm").format(new Date());
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(getVideoFilePath(videoFileName, this));
-        int milliseconds = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-        int duration = milliseconds / 1000;
-        //TODO: get the actual location
-        String location = "Canyon Road, Dhahran";
-        Video newVideo = new Video(0, title, videoFileName, duration, location, false);
-        SQLiteDatabase database = new VideoBaseHelper(this).getWritableDatabase();
-        VideoBaseHelper.addVideo(newVideo, database);
-        //when done creating a video, send a broadcast intent for interested listeners
-        sendBroadcast(new Intent(ACTION_NEW_VIDEO));
-        Resources resources = getResources();
-        //and update the notification
-        notifyBuilder
-            .setContentTitle(resources.getString(R.string.notify_done_capturing_title))
-            .setContentText(resources.getString(R.string.notify_done_capturing_text));
-        notifyManager.notify(notifyId, notifyBuilder.build());
-        wakeScreen(5);
+        //unless its continuous mode, in which case just keep track of the saved video file
+        //or if we're stopping
+        if (!continuousCapture || !rotate)
+        {
+            String title = new SimpleDateFormat("yyyy/MM/dd - HH:mm").format(new Date());
+            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+            mmr.setDataSource(getVideoFilePath(videoFileName, this));
+            int milliseconds = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+            int duration = milliseconds / 1000;
+            //TODO: get the actual location
+            String location = "Canyon Road, Dhahran";
+            Video newVideo = new Video(0, title, videoFileName, duration, location, false);
+            SQLiteDatabase database = new VideoBaseHelper(this).getWritableDatabase();
+            VideoBaseHelper.addVideo(newVideo, database);
+            //when done creating a video, send a broadcast intent for interested listeners
+            sendBroadcast(new Intent(ACTION_NEW_VIDEO));
+            Resources resources = getResources();
+            //and update the notification
+            notifyBuilder
+                .setContentTitle(resources.getString(R.string.notify_done_capturing_title))
+                .setContentText(resources.getString(R.string.notify_done_capturing_text));
+            notifyManager.notify(notifyId, notifyBuilder.build());
+            wakeScreen(5);
+        }
+        if (previewSession != null)
+        {
+            previewSession.close();
+            previewSession = null;
+        }
+        //if this is a rotation, we need to start another recording ASAP
+        if (rotate)
+        {
+            startRecordingVideo();
+        }
     }
 
     /**
@@ -598,25 +587,6 @@ public class CaptureService extends Service
             wl.acquire(seconds * 1000);
             PowerManager.WakeLock wl_cpu = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"CaptureCoreLock");
             wl_cpu.acquire(seconds * 1000);
-        }
-    }
-
-    /**
-     * Rotate the recorders so that recording can proceed on a new file.
-     */
-    private void rotateRecorders()
-    {
-        Log.i(TAG, "Rotating Recorders");
-        rotationCount++;
-        if (rotationCount == 2)
-        {
-            primaryRecorder.stop();
-            primaryRecorder.reset();
-            secondaryRecorder.start();
-        }
-        if (rotationCount == 3)
-        {
-            setAlarm(this, false);
         }
     }
 }
