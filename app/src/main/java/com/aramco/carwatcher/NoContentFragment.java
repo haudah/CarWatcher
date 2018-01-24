@@ -90,12 +90,12 @@ public class NoContentFragment extends Fragment
             @Override
             public void onClick(View v)
             {
+                //Intent intent = new Intent();
+                //intent.setAction("com.aramco.carwatcher.TOGGLECAPTURE");
                 //same intent is used for capture/stop capturing
-                //Intent intent = CaptureService.newIntent(getActivity());
-                //getActivity().startService(intent);
-                Intent intent = new Intent();
-                intent.setAction("com.aramco.carwatcher.TOGGLECAPTURE");
-                getActivity().sendBroadcast(intent);
+                Intent captureIntent = CaptureService.newIntent(getActivity(), false);
+                getActivity().startService(captureIntent);
+                //getActivity().sendBroadcast(intent);
                 if (!capturing)
                 {
                     ((Button)v).setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_record_red, 0, 0, 0);

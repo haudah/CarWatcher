@@ -58,7 +58,7 @@ public class CaptureService extends Service
     private static final SparseIntArray DEFAULT_ORIENTATIONS = new SparseIntArray();
     private static final SparseIntArray INVERSE_ORIENTATIONS = new SparseIntArray();
     private static final String TAG = "CaptureService";
-    private static final String EXTRA_CONTINUOUS = "EXTRA_CONTINUOUS";
+    private static final String EXTRA_USER_DRIVEN = "EXTRA_USER_DRIVEN";
     private static final String EXTRA_ROTATION = "EXTRA_ROTATION";
     //the interval (in seconds) for recorder rotation during continuous capture mode
     private static final long ROTATION_INTERVAL = TimeUnit.SECONDS.toMillis(10);
@@ -79,6 +79,8 @@ public class CaptureService extends Service
     private boolean isRecordingVideo = false;
     //whether service is running in continuous mode
     private boolean continuousCapture = false;
+    //whether a recording in the current continuous capture has been started yet
+    private boolean continuousRecording = false;
     //the UI thread handler
     private Handler uiHandler;
     //the size of the video to capture
@@ -91,8 +93,10 @@ public class CaptureService extends Service
     private String videoFileName;
     //we need a notification id to update the notification upon completion
     private int notifyId = 1;
+    private int notifyIdContinuous = 2;
     //keep reference to notification builder for updating notification
     private NotificationCompat.Builder notifyBuilder;
+    private NotificationCompat.Builder notifyBuilderContinuous;
     //and the notification manager as well
     private NotificationManager notifyManager;
     //this counter keeps track of how many times the recorders have been rotated
@@ -101,6 +105,9 @@ public class CaptureService extends Service
     //this will only be true for the first run; it is needed to allow the first
     //startRecordingVideo to be called after the camera is open
     private boolean firstRun;
+    //the first trigger of the alarm should be ignored since it will start
+    //immediately when the alarm is set
+    private boolean firstAlarm;
     //in continuous mode, this is the most recently saved file in the current run
     private File lastVideoFile = null;
 
@@ -129,11 +136,12 @@ public class CaptureService extends Service
      * @param continuous whether the start/stop command is for continuous capture
      * @return an intent that you can send to CaptureService to start/stop recording.
      */
-    public static Intent newIntent(Context context, boolean continuous, boolean continuousRecord)
+    public static Intent newIntent(Context context, boolean continuous)
     {
         Intent intent = new Intent(context, CaptureService.class);
-        intent.putExtra(EXTRA_CONTINUOUS, continuous);
-        intent.putExtra(EXTRA_CONTINUOUS_RECORD, continuousRecord);
+        //starting/stopping continuous captures are not driven by the user
+        //but by conditions like charging/bluetooth
+        intent.putExtra(EXTRA_USER_DRIVEN, !continuous);
         //Intent intent = new Intent();
         //intent.setComponent(new ComponentName("com.aramco.carwatcher", "com.aramco.carwatcher.CaptureService"));
         return intent;
@@ -142,35 +150,149 @@ public class CaptureService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        //check if this is for continuous capture
-        continuousCapture = intent.getExtras().getBoolean(EXTRA_CONTINUOUS);
+        //check if this is for continuous capture (i.e. not user-driven)
+        //TODO: what if there's a non-continuous capture in progress
+        boolean userDriven = true;
+        if (intent.hasExtra("EXTRA_USER_DRIVEN"))
+        {
+            userDriven = intent.getExtras().getBoolean(EXTRA_USER_DRIVEN);
+        }
+        if (!continuousCapture && !userDriven)
+        {
+            continuousCapture = true;
+        }
         //the continuousRecord flag is what starts and stops the user-requested recording during
         //a continuous capture
-        boolean continuousRecord = intent.getExtras().getBoolean(EXTRA_CONTINUOUS_RECORD);
-        boolean rotate = intent.getExtras().getBoolean(EXTRA_ROTATE);
+        boolean rotate = intent.getExtras().getBoolean(EXTRA_ROTATION);
+
         //check if we need to start or stop recording
         if (!isRecordingVideo)
         {
-            //start the actual recording unless its the firstRun
-            if (!firstRun)
+            //if this is a rotation but there is no capture currently going, do nothing
+            if (!rotate)
             {
-                startRecordingVideo();
-            }
-            firstRun = false;
-            //if its going to run in continuous mode,
-            //schedule a 30-second recorder shift
-            if (continuousCapture)
-            {
-                setAlarm(this, true);
+                showNotification(userDriven, true);
+                //start the actual recording unless its the firstRun
+                if (!firstRun)
+                {
+                    startRecordingVideo();
+                }
+                firstRun = false;
+                //if its going to run in continuous mode,
+                //schedule a 30-second recorder shift
+                if (continuousCapture)
+                {
+                    setAlarm(this, true);
+                }
             }
         }
         else
         {
-            stopRecordingVideo(rotate);
+            //if we're continuousRecording, but this is a user-driven command, stop recording
+            //(also stop recording if this is not a continuous capture)
+            //(also stop recording for a rotation)
+            if (!continuousCapture || (!userDriven && !rotate) || (rotate ^ continuousRecording))
+            {
+                if (continuousCapture && !rotate && !userDriven)
+                {
+                    showNotification(false, false);
+                    setAlarm(this, false);
+                }
+                stopRecordingVideo(rotate, userDriven);
+                //if this is a continuous capture, and recording is being stopped
+                //(not rotated) then we're no longer continuousRecording
+                if (continuousRecording && !rotate)
+                {
+                    continuousRecording = false;
+                    showNotification(true, false);
+                }
+            }
+            //if a continuous capture was running, no recording was in progress,
+            //and this is a user-driven command
+            else if (continuousCapture && !continuousRecording)
+            {
+                continuousRecording = true;
+                //show notfication for user-driven
+                showNotification(true, true);
+            }
         }
 
         //don't restart this service if it's closed by the OS
         return START_NOT_STICKY;
+    }
+
+    private void showNotification(boolean userDriven, boolean start)
+    {
+        Resources resources = getResources();
+        //certain configs only need to be done once
+        if (notifyManager == null)
+        {
+            //show the notification
+            notifyManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+            //channel id
+            String channelId = "carwatcher_channel";
+            //user-visible name of the channel
+            CharSequence name = resources.getString(R.string.notify_channel_name);
+            //user-visible description of the channel
+            String description = resources.getString(R.string.notify_channel_description);
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            //get the Uri for the default notification sound
+            Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            //we only need to create a channel on API > 26
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            {
+                NotificationChannel channel = new NotificationChannel(channelId, name, importance);
+                channel.setDescription(description);
+                channel.enableVibration(false);
+                notifyManager.createNotificationChannel(channel);
+            }
+
+            notifyBuilder = new NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.drawable.ic_shutter_white)
+                .setSound(uri)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true);
+            notifyBuilderContinuous = new NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.drawable.ic_shutter_white)
+                .setContentTitle(resources.getString(R.string.notify_continuous_title))
+                .setContentText(resources.getString(R.string.notify_continuous_text))
+                .setSound(uri)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true);
+        }
+        if (userDriven)
+        {
+            if (start)
+            {
+                notifyBuilder
+                    .setContentTitle(resources.getString(R.string.notify_capturing_title))
+                    .setContentText(resources.getString(R.string.notify_capturing_text));
+            }
+            else
+            {
+                notifyBuilder
+                    .setContentTitle(resources.getString(R.string.notify_done_capturing_title))
+                    .setContentText(resources.getString(R.string.notify_done_capturing_text));
+            }
+            notifyManager.notify(notifyId, notifyBuilder.build());
+        }
+        else
+        {
+            if (start)
+            {
+                notifyBuilderContinuous
+                    .setContentTitle(resources.getString(R.string.notify_continuous_title))
+                    .setContentText(resources.getString(R.string.notify_continuous_text));
+            }
+            else
+            {
+                notifyBuilderContinuous
+                    .setContentTitle(resources.getString(R.string.notify_done_continuous_title))
+                    .setContentText(resources.getString(R.string.notify_done_continuous_text));
+            }
+            notifyManager.notify(notifyIdContinuous, notifyBuilderContinuous.build());
+        }
+        wakeScreen(5);
     }
 
     /**
@@ -182,13 +304,15 @@ public class CaptureService extends Service
     {
         Intent i = new Intent(context, CaptureService.class);
         i.putExtra(EXTRA_ROTATION, true);
-        i.putExtra(EXTRA_CONTINUOUS, true);
+        //rotations are obviously not user-driven
+        i.putExtra(EXTRA_USER_DRIVEN, false);
         PendingIntent pi = PendingIntent.getService(context, 0, i, 0);
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         if (enable)
         {
-            alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, 
-                    SystemClock.elapsedRealtime(), ROTATION_INTERVAL, pi);
+            firstAlarm = true;
+            alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + ROTATION_INTERVAL, ROTATION_INTERVAL, pi);
         }
         else
         {
@@ -394,37 +518,6 @@ public class CaptureService extends Service
         mediaRecorder = new MediaRecorder();
 
         isRecordingVideo = true;
-        //show the notification
-        notifyManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        Resources resources = getResources();
-        //channel id
-        String channelId = "carwatcher_channel";
-        //user-visible name of the channel
-        CharSequence name = resources.getString(R.string.notify_channel_name);
-        //user-visible description of the channel
-        String description = resources.getString(R.string.notify_channel_description);
-        int importance = NotificationManager.IMPORTANCE_HIGH;
-        //get the Uri for the default notification sound
-        Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        //we only need to create a channel on API > 26
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        {
-            NotificationChannel channel = new NotificationChannel(channelId, name, importance);
-            channel.setDescription(description);
-            channel.enableVibration(false);
-            notifyManager.createNotificationChannel(channel);
-        }
-
-        notifyBuilder = new NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.ic_shutter_dark_grey)
-            .setContentTitle(resources.getString(R.string.notify_capturing_title))
-            .setContentText(resources.getString(R.string.notify_capturing_text))
-            .setSound(uri)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true);
-
-        notifyManager.notify(notifyId, notifyBuilder.build());
-        wakeScreen(5);
 
         try
         {
@@ -464,8 +557,13 @@ public class CaptureService extends Service
     /**
      * Stops the video recording process.
      */
-    private void stopRecordingVideo(boolean rotate)
+    private void stopRecordingVideo(boolean rotate, boolean userDriven)
     {
+        //if we're continuousRecording and this is a rotation, just ignore it
+        if (continuousRecording && rotate)
+        {
+            return;
+        }
         try
         {
             previewSession.stopRepeating();
@@ -476,30 +574,34 @@ public class CaptureService extends Service
         isRecordingVideo = false;
         mediaRecorder.stop();
         mediaRecorder.reset();
-        //if all went well, add the new video file to the DB
-        //unless its continuous mode, in which case just keep track of the saved video file
-        //or if we're stopping
-        if (!continuousCapture || !rotate)
+        if (!rotate)
         {
-            String title = new SimpleDateFormat("yyyy/MM/dd - HH:mm").format(new Date());
-            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-            mmr.setDataSource(getVideoFilePath(videoFileName, this));
-            int milliseconds = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-            int duration = milliseconds / 1000;
-            //TODO: get the actual location
-            String location = "Canyon Road, Dhahran";
-            Video newVideo = new Video(0, title, videoFileName, duration, location, false);
-            SQLiteDatabase database = new VideoBaseHelper(this).getWritableDatabase();
-            VideoBaseHelper.addVideo(newVideo, database);
-            //when done creating a video, send a broadcast intent for interested listeners
-            sendBroadcast(new Intent(ACTION_NEW_VIDEO));
-            Resources resources = getResources();
-            //and update the notification
-            notifyBuilder
-                .setContentTitle(resources.getString(R.string.notify_done_capturing_title))
-                .setContentText(resources.getString(R.string.notify_done_capturing_text));
-            notifyManager.notify(notifyId, notifyBuilder.build());
-            wakeScreen(5);
+            //We will only be adding a new video entry now if:
+            //1) This is not a continuous capture, and every stop should result in a new entry
+            //2) This is a continuous capture, but we're already continuousRecording and the
+            //   user is stopping the continuousRecording
+            //3) This is a continuous capture, and we're already continuousRecording but the
+            //   entire capture is being stopped (e.g. bluetooth out of range)
+            if (!continuousCapture || continuousRecording) {
+                String title = new SimpleDateFormat("yyyy/MM/dd - HH:mm").format(new Date());
+                MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                mmr.setDataSource(getVideoFilePath(videoFileName, this));
+                int milliseconds = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+                int duration = milliseconds / 1000;
+                //TODO: get the actual location
+                String location = "Canyon Road, Dhahran";
+                Video newVideo = new Video(0, title, videoFileName, duration, location, false);
+                SQLiteDatabase database = new VideoBaseHelper(this).getWritableDatabase();
+                VideoBaseHelper.addVideo(newVideo, database);
+                //when done creating a video, send a broadcast intent for interested listeners
+                sendBroadcast(new Intent(ACTION_NEW_VIDEO));
+                //and update the notification
+            }
+            //we should also update the notification if we're stopping a continuous capture
+            if (continuousCapture && !userDriven) {
+                continuousCapture = false;
+                //and update the notification
+            }
         }
         if (previewSession != null)
         {
@@ -507,7 +609,9 @@ public class CaptureService extends Service
             previewSession = null;
         }
         //if this is a rotation, we need to start another recording ASAP
-        if (rotate)
+        //also start another recording if this is a continuous recording and we are stopping based on a
+        //user-driven request
+        if (rotate || (continuousRecording && userDriven))
         {
             startRecordingVideo();
         }

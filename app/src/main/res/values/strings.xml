@@ -18,8 +18,12 @@
     <string name="list_item_submitted">Submitted: </string>
     <string name="notify_capturing_title">Capturing CarWatcher video</string>
     <string name="notify_capturing_text">Touch to stop capturing</string>
+    <string name="notify_continuous_title">CarWatcher monitor mode active</string>
+    <string name="notify_continuous_text">Touch to stop monitoring</string>
     <string name="notify_done_capturing_title">Captured a CarWatcher video</string>
     <string name="notify_done_capturing_text">Touch to play</string>
+    <string name="notify_done_continuous_title">CarWatcher monitor mode stopped</string>
+    <string name="notify_done_continuous_text">Reconnect with vehicle to reactivate</string>
     <string name="notify_channel_name">CarWatcher Notifications</string>
     <string name="notify_channel_description">Notification channel for notifications sent from the CarWatcher application</string>
     <string name="delete_associated_media">Delete associated media files?</string>
