@@ -143,7 +143,7 @@ public class SettingsActivity extends AppCompatActivity
                 return true;
             case R.id.menu_settings_save:
                 //need to write to shared prefs when saving
-                SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences sharedPref = getSharedPreferences(SETTINGS_FILE, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
                 //when saving, check the current status of the views
                 if (arabicRadioButton.isChecked())

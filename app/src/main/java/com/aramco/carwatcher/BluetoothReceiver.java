@@ -33,7 +33,7 @@ public class BluetoothReceiver extends BroadcastReceiver
         boolean bluetooth = sharedPref.getInt(SettingsActivity.BLUETOOTH_ENABLED_SETTING, 0) == 1;
         String bluetoothAddress = sharedPref.getString(SettingsActivity.BLUETOOTH_SETTING, "NOT_CONFIGURED");
         //if it's not enabled or configured, do nothing
-        if (!bluetooth || bluetoothAddress.equals("NOT_CONFIGURED"))
+        if (!bluetooth || bluetoothAddress.equals("NOT_CONFIGUREDX"))
         {
             stopCaptureIfRunning(context);
         }
@@ -42,8 +42,8 @@ public class BluetoothReceiver extends BroadcastReceiver
         Intent batteryStatus = context.registerReceiver(null, iFilter);
         int chargingStatus = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         //if it's not charging, do nothing
-        if (chargingStatus == BatteryManager.BATTERY_STATUS_CHARGING ||
-                chargingStatus == BatteryManager.BATTERY_STATUS_FULL)
+        if (chargingStatus != BatteryManager.BATTERY_STATUS_CHARGING &&
+                chargingStatus != BatteryManager.BATTERY_STATUS_FULL)
         {
             stopCaptureIfRunning(context);
         }
@@ -58,7 +58,18 @@ public class BluetoothReceiver extends BroadcastReceiver
         BluetoothDevice found = null;
         for (int profile : profiles)
         {
-            List<BluetoothDevice> connectedDevices = manager.getConnectedDevices(profile);
+            List<BluetoothDevice> connectedDevices = null;
+            try
+            {
+                connectedDevices = manager.getConnectedDevices(profile);
+            }
+            catch (IllegalArgumentException e)
+            {
+                int x;
+                x = 1;
+                //if profile is not supported, just move on to next one
+                continue;
+            }
             //check if the one we're looking for is here
             for (BluetoothDevice device : connectedDevices)
             {
