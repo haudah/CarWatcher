@@ -60,8 +60,10 @@ public class CaptureService extends Service
     private static final String TAG = "CaptureService";
     private static final String EXTRA_USER_DRIVEN = "EXTRA_USER_DRIVEN";
     private static final String EXTRA_ROTATION = "EXTRA_ROTATION";
+    private static final String EXTRA_SET_RUNNING = "EXTRA_SET_RUNNING";
+    private static final String EXTRA_SET_STOPPED = "EXTRA_SET_STOPPED";
     //the interval (in seconds) for recorder rotation during continuous capture mode
-    private static final long ROTATION_INTERVAL = TimeUnit.SECONDS.toMillis(10);
+    private static final long ROTATION_INTERVAL = TimeUnit.SECONDS.toMillis(500);
     public static final String ACTION_NEW_VIDEO = "com.aramco.carwatcher.CHECK_VIDEOS";
     //the opened camera device
     private CameraDevice cameraDevice;
@@ -99,9 +101,9 @@ public class CaptureService extends Service
     private NotificationCompat.Builder notifyBuilderContinuous;
     //and the notification manager as well
     private NotificationManager notifyManager;
-    //this counter keeps track of how many times the recorders have been rotated
-    //when in continuous mode
-    private int rotationCount = 0;
+    //this variable keeps track of the last rotated video file, which will need to
+    //be deleted when a new one comes in
+    private File rotationFile = null;
     //this will only be true for the first run; it is needed to allow the first
     //startRecordingVideo to be called after the camera is open
     private boolean firstRun;
@@ -142,14 +144,49 @@ public class CaptureService extends Service
         //starting/stopping continuous captures are not driven by the user
         //but by conditions like charging/bluetooth
         intent.putExtra(EXTRA_USER_DRIVEN, !continuous);
-        //Intent intent = new Intent();
-        //intent.setComponent(new ComponentName("com.aramco.carwatcher", "com.aramco.carwatcher.CaptureService"));
+        return intent;
+    }
+
+    /**
+     * This variant adds the extra for setting a target state of a continuous capture, as opposed to toggling
+     * the current state.
+     *
+     * @param context the application context
+     * @param continuous whether the start/stop command is for continuous capture
+     * @param targetRunning whether the target state of the continuous capture is running
+     * @return an intent that you can send to CaptureService to start/stop recording.
+     */
+    public static Intent newIntent(Context context, boolean continuous, boolean targetRunning)
+    {
+        Intent intent = newIntent(context, continuous);
+        if (targetRunning)
+        {
+            intent.putExtra(EXTRA_SET_RUNNING, true);
+        }
+        else
+        {
+            intent.putExtra(EXTRA_SET_STOPPED, true);
+        }
         return intent;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
+        //the bluetooth receiver may send commands that target a specific state, unlike
+        //other intents that only toggle without regard to current state
+        if (intent.hasExtra(EXTRA_SET_RUNNING) && continuousCapture)
+        {
+            //if we're targeting a running continuous capture but
+            //it's already running..do nothing
+            return START_NOT_STICKY;
+        }
+        else if (intent.hasExtra(EXTRA_SET_STOPPED) && !continuousCapture)
+        {
+            //if we're targeting a stopped continuous capture but
+            //it's already stopped..do nothing
+            return START_NOT_STICKY;
+        }
         //check if this is for continuous capture (i.e. not user-driven)
         //TODO: what if there's a non-continuous capture in progress
         boolean userDriven = true;
@@ -160,6 +197,8 @@ public class CaptureService extends Service
         if (!continuousCapture && !userDriven)
         {
             continuousCapture = true;
+            //always reset the rotation file when starting a continuous capture
+            rotationFile = null;
         }
         //the continuousRecord flag is what starts and stops the user-requested recording during
         //a continuous capture
@@ -198,13 +237,21 @@ public class CaptureService extends Service
                     showNotification(false, false);
                     setAlarm(this, false);
                 }
-                stopRecordingVideo(rotate, userDriven);
+                //if we're about to stop a continuousRecording or non-continuous capture
+                //show the video captured notification
+                if (!rotate)
+                {
+                    if (continuousRecording || !continuousCapture)
+                    {
+                        showNotification(true, false);
+                    }
+                }
+                stopRecordingVideo(rotate, userDriven, this);
                 //if this is a continuous capture, and recording is being stopped
                 //(not rotated) then we're no longer continuousRecording
-                if (continuousRecording && !rotate)
+                if (!rotate)
                 {
                     continuousRecording = false;
-                    showNotification(true, false);
                 }
             }
             //if a continuous capture was running, no recording was in progress,
@@ -557,7 +604,7 @@ public class CaptureService extends Service
     /**
      * Stops the video recording process.
      */
-    private void stopRecordingVideo(boolean rotate, boolean userDriven)
+    private void stopRecordingVideo(boolean rotate, boolean userDriven, Context context)
     {
         //if we're continuousRecording and this is a rotation, just ignore it
         if (continuousRecording && rotate)
@@ -582,7 +629,8 @@ public class CaptureService extends Service
             //   user is stopping the continuousRecording
             //3) This is a continuous capture, and we're already continuousRecording but the
             //   entire capture is being stopped (e.g. bluetooth out of range)
-            if (!continuousCapture || continuousRecording) {
+            if (!continuousCapture || continuousRecording)
+            {
                 String title = new SimpleDateFormat("yyyy/MM/dd - HH:mm").format(new Date());
                 MediaMetadataRetriever mmr = new MediaMetadataRetriever();
                 mmr.setDataSource(getVideoFilePath(videoFileName, this));
@@ -598,10 +646,27 @@ public class CaptureService extends Service
                 //and update the notification
             }
             //we should also update the notification if we're stopping a continuous capture
-            if (continuousCapture && !userDriven) {
+            if (continuousCapture && !userDriven)
+            {
                 continuousCapture = false;
-                //and update the notification
+                //delete the last rotated file when stopping a continuous capture
+                if (rotationFile != null)
+                {
+                    rotationFile.delete();
+                }
+                //dont worry, it will be nullified on a new cont capture
             }
+        }
+        else
+        {
+            //if this is a rotation, remember the video file,
+            //and overwrite the last one (if there is one)
+            if (rotationFile != null)
+            {
+                rotationFile.delete();
+            }
+            //get the video file path for the newly rotated video file
+            rotationFile = new File(getVideoFilePath(videoFileName, context));
         }
         if (previewSession != null)
         {

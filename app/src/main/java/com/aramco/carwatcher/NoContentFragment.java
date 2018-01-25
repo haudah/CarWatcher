@@ -90,11 +90,11 @@ public class NoContentFragment extends Fragment
             @Override
             public void onClick(View v)
             {
-                //Intent intent = new Intent();
-                //intent.setAction("com.aramco.carwatcher.TOGGLECAPTURE");
+                Intent intent = new Intent();
+                intent.setAction("com.aramco.carwatcher.TOGGLECAPTURE");
                 //same intent is used for capture/stop capturing
-                Intent captureIntent = CaptureService.newIntent(getActivity(), false);
-                getActivity().startService(captureIntent);
+                //Intent captureIntent = CaptureService.newIntent(getActivity(), false);
+                getActivity().startService(intent);
                 //getActivity().sendBroadcast(intent);
                 if (!capturing)
                 {

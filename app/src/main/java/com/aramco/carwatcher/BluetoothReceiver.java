@@ -1,5 +1,6 @@
 package com.aramco.carwatcher;
 
+import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -24,18 +25,19 @@ public class BluetoothReceiver extends BroadcastReceiver
     private static final String TAG = "CaptureReceiver";
 
     @Override
-    public void onReceive(Context context, Intent intent)
+    public void onReceive(final Context context, Intent intent)
     {
         Log.i(TAG, "Received broadcast intent: " + intent.getAction());
         //first check if vehicle integration is enabled
         SharedPreferences sharedPref =
             context.getSharedPreferences(SettingsActivity.SETTINGS_FILE, Context.MODE_PRIVATE);
         boolean bluetooth = sharedPref.getInt(SettingsActivity.BLUETOOTH_ENABLED_SETTING, 0) == 1;
-        String bluetoothAddress = sharedPref.getString(SettingsActivity.BLUETOOTH_SETTING, "NOT_CONFIGURED");
+        final String bluetoothAddress = sharedPref.getString(SettingsActivity.BLUETOOTH_SETTING, "NOT_CONFIGURED");
         //if it's not enabled or configured, do nothing
-        if (!bluetooth || bluetoothAddress.equals("NOT_CONFIGUREDX"))
+        if (!bluetooth || bluetoothAddress.equals("NOT_CONFIGURED"))
         {
             stopCaptureIfRunning(context);
+            return;
         }
         //get charging status
         IntentFilter iFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
@@ -46,61 +48,69 @@ public class BluetoothReceiver extends BroadcastReceiver
                 chargingStatus != BatteryManager.BATTERY_STATUS_FULL)
         {
             stopCaptureIfRunning(context);
+            return;
         }
         //check if the configured bluetooth device is connected
         //get list of paired and connected devices
         BluetoothManager manager = (BluetoothManager)context.getSystemService(Context.BLUETOOTH_SERVICE);
         BluetoothAdapter adapter = manager.getAdapter();
-        Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
-        //get the list of connected devices for the major profiles
-        int[] profiles =
-            new int[] {BluetoothProfile.GATT, BluetoothProfile.A2DP, BluetoothProfile.HEADSET};
-        BluetoothDevice found = null;
-        for (int profile : profiles)
-        {
-            List<BluetoothDevice> connectedDevices = null;
-            try
+
+        adapter.getProfileProxy(context, new BluetoothProfile.ServiceListener() {
+            @Override
+            public void onServiceConnected(int i, final BluetoothProfile bluetoothProfile)
             {
-                connectedDevices = manager.getConnectedDevices(profile);
-            }
-            catch (IllegalArgumentException e)
-            {
-                int x;
-                x = 1;
-                //if profile is not supported, just move on to next one
-                continue;
-            }
-            //check if the one we're looking for is here
-            for (BluetoothDevice device : connectedDevices)
-            {
-                if (device.getAddress().equals(bluetoothAddress))
+                List<BluetoothDevice> devices = bluetoothProfile.getConnectedDevices();
+                boolean found = false;
+                for (BluetoothDevice device : devices)
                 {
-                    found = device;
-                    break;
+                    //if the device matches the address we're looking for
+                    if (device.getAddress().equals(bluetoothAddress))
+                    {
+                        //the device is charging and bluetooth is connected to the car, we can start
+                        //the continuous capture
+                        Intent captureIntent = CaptureService.newIntent(context, true);
+                        context.startService(captureIntent);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    stopCaptureIfRunning(context);
                 }
             }
-            if (found != null)
+
+            @Override
+            public void onServiceDisconnected(int i)
             {
-                //the device we're looking for is connected
-                break;
             }
-        }
-        //if the device is not connected, stop here
-        if (found == null)
-        {
-            stopCaptureIfRunning(context);
-        }
-        //the device is charging and bluetooth is connected to the car, we can start
-        //the continuous capture
-        Intent captureIntent = CaptureService.newIntent(context, true);
-        context.startService(captureIntent);
+        }, BluetoothProfile.HEADSET);
+
     }
 
     //this function will send the stop intent to the CaptureService if it's running
     //but do nothing if it's not running
     private void stopCaptureIfRunning(Context context)
     {
-        Intent stopIntent = CaptureService.newIntent(context, true);
+        //check if service is running
+        ActivityManager manager = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
+        {
+            if (CaptureService.class.getName().equals(service.service.getClassName()))
+            {
+                //service is running so stop capture (if there is one in progress)
+                Intent stopIntent = CaptureService.newIntent(context, true, false);
+                context.startService(stopIntent);
+            }
+        }
+    }
+
+    //this function will send the start intent to the CaptureService if it's not running
+    //but do nothing if it's already running
+    private void startCaptureIfNotRunning(Context context)
+    {
+        //stop capture (if there isn't one already in progress)
+        Intent stopIntent = CaptureService.newIntent(context, true, true);
         context.startService(stopIntent);
     }
 }
