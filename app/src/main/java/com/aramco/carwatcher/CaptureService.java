@@ -112,6 +112,9 @@ public class CaptureService extends Service
     private boolean firstAlarm;
     //in continuous mode, this is the most recently saved file in the current run
     private File lastVideoFile = null;
+    //this lock is used to wait for abortCaptures to complete before using the camera
+    //for the next session
+    private Semaphore sessionLock;
 
     @Override
     public void onCreate()
@@ -122,6 +125,8 @@ public class CaptureService extends Service
         startBackgroundThread();
         //open the camera for recording
         openCamera();
+        //init the semaphore
+        sessionLock = new Semaphore(1);
     }
 
     @Override
@@ -591,6 +596,83 @@ public class CaptureService extends Service
                 {
                     //TODO: handle the error
                 }
+
+                @Override
+                public void onReady(CameraCaptureSession cameraCaptureSession)
+                {
+                    //how can we know if this is the first onReady after abortCaptures
+                    if (!onReadyRun)
+                    {
+                        return;
+                    }
+                    //block the next one
+                    onReadyRun = false;
+                    boolean rotate = onReadyRotate;
+                    boolean userDriven = onReadyUserDriven;
+                    Context context = onReadyContext;
+                    //stop doing this here..wait for abort captures to complete (i.e onReady)
+                    isRecordingVideo = false;
+                    //mediaRecorder.stop();
+                    //mediaRecorder.reset();
+                    if (!rotate)
+                    {
+                        //We will only be adding a new video entry now if:
+                        //1) This is not a continuous capture, and every stop should result in a new entry
+                        //2) This is a continuous capture, but we're already continuousRecording and the
+                        //   user is stopping the continuousRecording
+                        //3) This is a continuous capture, and we're already continuousRecording but the
+                        //   entire capture is being stopped (e.g. bluetooth out of range)
+                        if (!continuousCapture || continuousRecording)
+                        {
+                            String title = new SimpleDateFormat("yyyy/MM/dd - HH:mm").format(new Date());
+                            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                            mmr.setDataSource(getVideoFilePath(videoFileName, context));
+                            int milliseconds = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+                            int duration = milliseconds / 1000;
+                            //TODO: get the actual location
+                            String location = "Canyon Road, Dhahran";
+                            Video newVideo = new Video(0, title, videoFileName, duration, location, false);
+                            SQLiteDatabase database = new VideoBaseHelper(context).getWritableDatabase();
+                            VideoBaseHelper.addVideo(newVideo, database);
+                            //when done creating a video, send a broadcast intent for interested listeners
+                            sendBroadcast(new Intent(ACTION_NEW_VIDEO));
+                        }
+                        //we should also update the notification if we're stopping a continuous capture
+                        if (continuousCapture && !userDriven)
+                        {
+                            continuousCapture = false;
+                            //delete the last rotated file when stopping a continuous capture
+                            if (rotationFile != null)
+                            {
+                                rotationFile.delete();
+                            }
+                            //dont worry, it will be nullified on a new cont capture
+                        }
+                    }
+                    else
+                    {
+                        //if this is a rotation, remember the video file,
+                        //and overwrite the last one (if there is one)
+                        if (rotationFile != null)
+                        {
+                            rotationFile.delete();
+                        }
+                        //get the video file path for the newly rotated video file
+                        rotationFile = new File(getVideoFilePath(videoFileName, context));
+                    }
+                    if (previewSession != null)
+                    {
+                        previewSession.close();
+                        previewSession = null;
+                    }
+                    //if this is a rotation, we need to start another recording ASAP
+                    //also start another recording if this is a continuous recording and we are stopping based on a
+                    //user-driven request
+                    if (rotate || (continuousRecording && userDriven))
+                    {
+                        startRecordingVideo();
+                    }
+                }
             }, backgroundHandler);
         }
         catch (CameraAccessException | IOException e)
@@ -600,6 +682,12 @@ public class CaptureService extends Service
             isRecordingVideo = false;
         }
     }
+
+    //these will be used by onReady function
+    private boolean onReadyRotate = false;
+    private boolean onReadyUserDriven = false;
+    private Context onReadyContext = null;
+    private boolean onReadyRun = false;
 
     /**
      * Stops the video recording process.
@@ -613,72 +701,26 @@ public class CaptureService extends Service
         }
         try
         {
+            //give onReady everything it needs to do its work
+            onReadyRun = true;
+            onReadyUserDriven = userDriven;
+            onReadyRotate = rotate;
+            onReadyContext = context;
             previewSession.stopRepeating();
+            previewSession.abortCaptures();
+            //block the rest of the function until the camera is ready
+            try
+            {
+                sessionLock.acquire();
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
         }
         catch (CameraAccessException e)
         {
-        }
-        isRecordingVideo = false;
-        mediaRecorder.stop();
-        mediaRecorder.reset();
-        if (!rotate)
-        {
-            //We will only be adding a new video entry now if:
-            //1) This is not a continuous capture, and every stop should result in a new entry
-            //2) This is a continuous capture, but we're already continuousRecording and the
-            //   user is stopping the continuousRecording
-            //3) This is a continuous capture, and we're already continuousRecording but the
-            //   entire capture is being stopped (e.g. bluetooth out of range)
-            if (!continuousCapture || continuousRecording)
-            {
-                String title = new SimpleDateFormat("yyyy/MM/dd - HH:mm").format(new Date());
-                MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-                mmr.setDataSource(getVideoFilePath(videoFileName, this));
-                int milliseconds = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-                int duration = milliseconds / 1000;
-                //TODO: get the actual location
-                String location = "Canyon Road, Dhahran";
-                Video newVideo = new Video(0, title, videoFileName, duration, location, false);
-                SQLiteDatabase database = new VideoBaseHelper(this).getWritableDatabase();
-                VideoBaseHelper.addVideo(newVideo, database);
-                //when done creating a video, send a broadcast intent for interested listeners
-                sendBroadcast(new Intent(ACTION_NEW_VIDEO));
-                //and update the notification
-            }
-            //we should also update the notification if we're stopping a continuous capture
-            if (continuousCapture && !userDriven)
-            {
-                continuousCapture = false;
-                //delete the last rotated file when stopping a continuous capture
-                if (rotationFile != null)
-                {
-                    rotationFile.delete();
-                }
-                //dont worry, it will be nullified on a new cont capture
-            }
-        }
-        else
-        {
-            //if this is a rotation, remember the video file,
-            //and overwrite the last one (if there is one)
-            if (rotationFile != null)
-            {
-                rotationFile.delete();
-            }
-            //get the video file path for the newly rotated video file
-            rotationFile = new File(getVideoFilePath(videoFileName, context));
-        }
-        if (previewSession != null)
-        {
-            previewSession.close();
-            previewSession = null;
-        }
-        //if this is a rotation, we need to start another recording ASAP
-        //also start another recording if this is a continuous recording and we are stopping based on a
-        //user-driven request
-        if (rotate || (continuousRecording && userDriven))
-        {
-            startRecordingVideo();
+            e.printStackTrace();
         }
     }
 
