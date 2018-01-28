@@ -14,7 +14,9 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.Spinner;
@@ -30,6 +32,7 @@ public class SettingsActivity extends AppCompatActivity
     private RadioButton arabicRadioButton;
     private CheckBox bluetoothCheckBox;
     private Spinner pairedNamesSpinner;
+    private Button continuousButton;
     //the current language setting (0: english, 1: arabic)
     private int language;
     //the current bluetooth enabled setting
@@ -59,6 +62,17 @@ public class SettingsActivity extends AppCompatActivity
         arabicRadioButton = (RadioButton)findViewById(R.id.settings_language_arabic);
         bluetoothCheckBox = (CheckBox)findViewById(R.id.settings_bluetooth_enabled);
         pairedNamesSpinner = (Spinner)findViewById(R.id.settings_bluetooth_spinner);
+        continuousButton = (Button)findViewById(R.id.settings_continuous_button);
+        //the continuous button should start the continuous mode
+        continuousButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                //start capture (if there isn't one already in progress)
+                Intent intent = CaptureService.newIntent(SettingsActivity.this, true);
+                (SettingsActivity.this).startService(intent);
+            }
+        });
         //get current settings (if they've been configured previously)
         SharedPreferences sharedPref = getSharedPreferences(SETTINGS_FILE, Context.MODE_PRIVATE);
         language = sharedPref.getInt(LANGUAGE_SETTING, 0);

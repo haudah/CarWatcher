@@ -112,9 +112,6 @@ public class CaptureService extends Service
     private boolean firstAlarm;
     //in continuous mode, this is the most recently saved file in the current run
     private File lastVideoFile = null;
-    //this lock is used to wait for abortCaptures to complete before using the camera
-    //for the next session
-    private Semaphore sessionLock;
 
     @Override
     public void onCreate()
@@ -125,8 +122,6 @@ public class CaptureService extends Service
         startBackgroundThread();
         //open the camera for recording
         openCamera();
-        //init the semaphore
-        sessionLock = new Semaphore(1);
     }
 
     @Override
@@ -252,12 +247,6 @@ public class CaptureService extends Service
                     }
                 }
                 stopRecordingVideo(rotate, userDriven, this);
-                //if this is a continuous capture, and recording is being stopped
-                //(not rotated) then we're no longer continuousRecording
-                if (!rotate)
-                {
-                    continuousRecording = false;
-                }
             }
             //if a continuous capture was running, no recording was in progress,
             //and this is a user-driven command
@@ -302,14 +291,14 @@ public class CaptureService extends Service
             notifyBuilder = new NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.drawable.ic_shutter_white)
                 .setSound(uri)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setAutoCancel(true);
             notifyBuilderContinuous = new NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.drawable.ic_shutter_white)
                 .setContentTitle(resources.getString(R.string.notify_continuous_title))
                 .setContentText(resources.getString(R.string.notify_continuous_text))
                 .setSound(uri)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setAutoCancel(true);
         }
         if (userDriven)
@@ -319,6 +308,7 @@ public class CaptureService extends Service
                 notifyBuilder
                     .setContentTitle(resources.getString(R.string.notify_capturing_title))
                     .setContentText(resources.getString(R.string.notify_capturing_text));
+                    //.setContentIntent(
             }
             else
             {
@@ -612,8 +602,8 @@ public class CaptureService extends Service
                     Context context = onReadyContext;
                     //stop doing this here..wait for abort captures to complete (i.e onReady)
                     isRecordingVideo = false;
-                    //mediaRecorder.stop();
-                    //mediaRecorder.reset();
+                    mediaRecorder.stop();
+                    mediaRecorder.reset();
                     if (!rotate)
                     {
                         //We will only be adding a new video entry now if:
@@ -672,6 +662,14 @@ public class CaptureService extends Service
                     {
                         startRecordingVideo();
                     }
+
+                    //we have to set continuousRecording to false, so this was moved to the onReady callback
+                    //if this is a continuous capture, and recording is being stopped
+                    //(not rotated) then we're no longer continuousRecording
+                    if (!rotate)
+                    {
+                        continuousRecording = false;
+                    }
                 }
             }, backgroundHandler);
         }
@@ -708,15 +706,6 @@ public class CaptureService extends Service
             onReadyContext = context;
             previewSession.stopRepeating();
             previewSession.abortCaptures();
-            //block the rest of the function until the camera is ready
-            try
-            {
-                sessionLock.acquire();
-            }
-            catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }
         }
         catch (CameraAccessException e)
         {

@@ -109,8 +109,8 @@ public class BluetoothReceiver extends BroadcastReceiver
     //but do nothing if it's already running
     private void startCaptureIfNotRunning(Context context)
     {
-        //stop capture (if there isn't one already in progress)
-        Intent stopIntent = CaptureService.newIntent(context, true, true);
-        context.startService(stopIntent);
+        //start capture (if there isn't one already in progress)
+        Intent startIntent = CaptureService.newIntent(context, true, true);
+        context.startService(startIntent);
     }
 }
