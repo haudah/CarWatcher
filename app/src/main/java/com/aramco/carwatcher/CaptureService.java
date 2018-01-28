@@ -50,6 +50,8 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
+
 public class CaptureService extends Service
 {
     private static final String CAR_WATCHER_ACTION = "com.aramco.carwatcher.CaptureService.BIND";
@@ -305,16 +307,26 @@ public class CaptureService extends Service
         {
             if (start)
             {
+                //when user clicks on notification, it's as if flic was clicked to
+                //stop the userDriven capture
+                Intent captureIntent = CaptureService.newIntent(this, false);
+                PendingIntent pendingIntent = PendingIntent.getService(this, 0, captureIntent, FLAG_UPDATE_CURRENT);
                 notifyBuilder
                     .setContentTitle(resources.getString(R.string.notify_capturing_title))
-                    .setContentText(resources.getString(R.string.notify_capturing_text));
-                    //.setContentIntent(
+                    .setContentText(resources.getString(R.string.notify_capturing_text))
+                    .setContentIntent(pendingIntent);
             }
             else
             {
+                //when user clicks on notification, captured video should start playing
+                String videoFilePath = getVideoFilePath(videoFileName, this);
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(videoFilePath));
+                intent.setDataAndType(Uri.parse(videoFilePath), "video/mp4");
+                PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, FLAG_UPDATE_CURRENT);
                 notifyBuilder
                     .setContentTitle(resources.getString(R.string.notify_done_capturing_title))
-                    .setContentText(resources.getString(R.string.notify_done_capturing_text));
+                    .setContentText(resources.getString(R.string.notify_done_capturing_text))
+                    .setContentIntent(pendingIntent);
             }
             notifyManager.notify(notifyId, notifyBuilder.build());
         }
@@ -322,15 +334,21 @@ public class CaptureService extends Service
         {
             if (start)
             {
+                //when user clicks on notification, monitor mode should stop
+                Intent intent = CaptureService.newIntent(this, true);
+                PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, FLAG_UPDATE_CURRENT);
                 notifyBuilderContinuous
                     .setContentTitle(resources.getString(R.string.notify_continuous_title))
-                    .setContentText(resources.getString(R.string.notify_continuous_text));
+                    .setContentText(resources.getString(R.string.notify_continuous_text))
+                    .setContentIntent(pendingIntent);
             }
             else
             {
+                //this notification should take no action, so contentIntent is set to null
                 notifyBuilderContinuous
                     .setContentTitle(resources.getString(R.string.notify_done_continuous_title))
-                    .setContentText(resources.getString(R.string.notify_done_continuous_text));
+                    .setContentText(resources.getString(R.string.notify_done_continuous_text))
+                    .setContentIntent(null);
             }
             notifyManager.notify(notifyIdContinuous, notifyBuilderContinuous.build());
         }

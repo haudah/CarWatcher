@@ -68,7 +68,7 @@ public class SettingsActivity extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
-                //start capture (if there isn't one already in progress)
+                //this button simulates a continuous capture being triggered
                 Intent intent = CaptureService.newIntent(SettingsActivity.this, true);
                 (SettingsActivity.this).startService(intent);
             }
