@@ -53,6 +53,14 @@ public class Video implements Parcelable
         return title;
     }
 
+    /**
+     * The title is the only attribute of the video that may change on the client.
+     */
+    public void setTitle(String title)
+    {
+        this.title = title;
+    }
+
     public String getFileName()
     {
         return fileName;

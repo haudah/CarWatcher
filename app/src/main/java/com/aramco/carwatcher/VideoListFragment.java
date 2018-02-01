@@ -208,10 +208,10 @@ public class VideoListFragment extends Fragment
                     .load(Uri.fromFile(videoFile))
                     .into(thumbnailImageView);
             }
-            //if video was submitted updated submission text and color
+            //if video was submitted update submission text and color
             if (v.isSubmitted())
             {
-                submittedTextView.setText(R.string.yes);
+                submittedTextView.setText(R.string.submitted);
                 int color = getActivity().getResources().getColor(R.color.green);
                 submittedTextView.setTextColor(color);
             }
@@ -242,21 +242,34 @@ public class VideoListFragment extends Fragment
             //action depends on whether we're highlighting or not
             if (!highlighting)
             {
-                //get full path of file using filename
-                String videoFilePath =
-                    CaptureService.getVideoFilePath(video.getFileName(), getActivity());
-                //check if file exists, and if not, offer to delete entry
-                File videoFile = new File(videoFilePath);
-                if (!videoFile.exists())
+                //if not highlighting, clicking behaviour depends if clicked on
+                //the video thumbnail or the rest of the item
+                if (v.getId() == R.id.video_item_thumbnail_imageview)
                 {
-                    //TODO: offer to delete entry
+                    //if clicked on thumbnail, play the video
+                    //get full path of file using filename
+                    String videoFilePath =
+                        CaptureService.getVideoFilePath(video.getFileName(), getActivity());
+                    //check if file exists, and if not, offer to delete entry
+                    File videoFile = new File(videoFilePath);
+                    if (!videoFile.exists())
+                    {
+                        //TODO: offer to delete entry
+                    }
+                    else
+                    {
+                        //when user clicks on video item, play it in the media player
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(videoFilePath));
+                        intent.setDataAndType(Uri.parse(videoFilePath), "video/mp4");
+                        startActivity(intent);
+                    }
                 }
                 else
                 {
-                    //when user clicks on video item, play it in the media player
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(videoFilePath));
-                    intent.setDataAndType(Uri.parse(videoFilePath), "video/mp4");
-                    startActivity(intent);
+                    //if clicked anywhere else, show the video fragment
+                    FragmentManager fm = getFragmentManager();
+                    VideoFragment fragment = VideoFragment.newInstance(video);
+                    fragment.show(fm, "video_fragment");
                 }
             }
             else

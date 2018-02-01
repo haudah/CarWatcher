@@ -31,6 +31,16 @@
             android:src="@drawable/ic_play_circle_black"
             android:alpha="0.3"
             />
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:scaleType="fitCenter"
+            android:padding="6dp"
+            android:src="@drawable/ic_play_circle_white"
+            android:alpha="0.3"
+            />
     </RelativeLayout>
         <RelativeLayout
             android:layout_width="0dp"
@@ -118,7 +128,13 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="4dp"
-                    android:text="@string/list_item_submitted"
+                    android:text="@string/submitted"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text=":"
                     />
                 <TextView
                     android:id="@+id/list_item_video_submitted_textview"

@@ -15,14 +15,14 @@
     <string name="no">No</string>
     <string name="capture">Capture</string>
     <string name="stop_capturing">Stop Capturing</string>
-    <string name="list_item_submitted">Submitted: </string>
+    <string name="submitted">Submitted</string>
     <string name="notify_capturing_title">Capturing CarWatcher video</string>
     <string name="notify_capturing_text">Touch to stop capturing</string>
-    <string name="notify_continuous_title">CarWatcher monitor mode active</string>
+    <string name="notify_continuous_title">CarWatcher monitor started</string>
     <string name="notify_continuous_text">Touch to stop monitoring</string>
     <string name="notify_done_capturing_title">Captured a CarWatcher video</string>
     <string name="notify_done_capturing_text">Touch to play</string>
-    <string name="notify_done_continuous_title">CarWatcher monitor mode stopped</string>
+    <string name="notify_done_continuous_title">CarWatcher monitor stopped</string>
     <string name="notify_done_continuous_text">Reconnect with vehicle to reactivate</string>
     <string name="notify_channel_name">CarWatcher Notifications</string>
     <string name="notify_channel_description">Notification channel for notifications sent from the CarWatcher application</string>
@@ -33,6 +33,11 @@
     <string name="profile_acted_upon">Acted Upon</string>
     <string name="profile_processing">Processing</string>
     <string name="not_configured">Not Configured</string>
+    <string name="video_item_submit">Submit</string>
+    <string name="video_item_delete">Delete</string>
+    <string name="video_item_edit"><u>(Edit)</u></string>
+    <string name="video_name_hint">Enter video name</string>
+    <string name="edit_video_name_message">Edit video name</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

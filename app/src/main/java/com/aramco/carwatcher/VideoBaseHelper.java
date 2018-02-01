@@ -119,6 +119,21 @@ public class VideoBaseHelper extends SQLiteOpenHelper
     }
 
     /**
+     * Updates the title of the specified video to the specified string.
+     *
+     * @param video the video whose title is to be updated
+     * @param title the new title of the video
+     * @param database the database containing the video to be updated
+     */
+    public static boolean editVideoTitle(Video video, SQLiteDatabase database)
+    {
+        ContentValues values = new ContentValues();
+        values.put(VideoTable.Cols.TITLE, video.getTitle());
+        String id = Long.toString(video.getId());
+        return (database.update(VideoTable.NAME, values, "_id=?", new String[] {id}) == 1);
+    }
+
+    /**
      * Submits a video to the virtual backend.
      */
     public static boolean submitVideos(List<Video> videos, SQLiteDatabase database)

@@ -58,8 +58,11 @@ public class DeleteVideosFragment extends DialogFragment
                     //need to access database to delete video entries
                     SQLiteDatabase database = new VideoBaseHelper(getActivity()).getWritableDatabase();
                     VideoBaseHelper.removeVideos(videos, database);
-                    //update the VideoListFragment
-                    ((VideoListFragment)getTargetFragment()).stopHighlighting(1);
+                    //update the VideoListFragment if its set as target
+                    if (getTargetFragment() instanceof VideoListFragment)
+                    {
+                        ((VideoListFragment)getTargetFragment()).stopHighlighting(1);
+                    }
                 }
             })
             .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -67,7 +70,10 @@ public class DeleteVideosFragment extends DialogFragment
                 public void onClick(DialogInterface dialog, int id)
                 {
                     //update the VideoListFragment
-                    ((VideoListFragment)getTargetFragment()).stopHighlighting(0);
+                    if (getTargetFragment() instanceof VideoListFragment)
+                    {
+                        ((VideoListFragment)getTargetFragment()).stopHighlighting(0);
+                    }
                 }
             });
         return builder.create();

@@ -94,8 +94,8 @@ public class NoContentFragment extends Fragment
                 intent.setAction("com.aramco.carwatcher.TOGGLECAPTURE");
                 //same intent is used for capture/stop capturing
                 //Intent captureIntent = CaptureService.newIntent(getActivity(), false);
-                getActivity().startService(intent);
-                //getActivity().sendBroadcast(intent);
+                //getActivity().startService(intent);
+                getActivity().sendBroadcast(intent);
                 if (!capturing)
                 {
                     ((Button)v).setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_record_red, 0, 0, 0);

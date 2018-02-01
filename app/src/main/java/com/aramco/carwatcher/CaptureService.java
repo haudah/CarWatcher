@@ -293,14 +293,14 @@ public class CaptureService extends Service
             notifyBuilder = new NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.drawable.ic_shutter_white)
                 .setSound(uri)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true);
             notifyBuilderContinuous = new NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.drawable.ic_shutter_white)
                 .setContentTitle(resources.getString(R.string.notify_continuous_title))
                 .setContentText(resources.getString(R.string.notify_continuous_text))
                 .setSound(uri)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true);
         }
         if (userDriven)

@@ -35,9 +35,8 @@ public class BluetoothReceiver extends BroadcastReceiver
         boolean bluetooth = sharedPref.getInt(SettingsActivity.BLUETOOTH_ENABLED_SETTING, 0) == 1;
         final String bluetoothAddress = sharedPref.getString(SettingsActivity.BLUETOOTH_SETTING, "NOT_CONFIGURED");
         //if it's not enabled or configured, do nothing
-        if (!bluetooth || bluetoothAddress.equals("NOT_CONFIGUREDX"))
+        if (!bluetooth || bluetoothAddress.equals("NOT_CONFIGURED"))
         {
-            Toast.makeText(context, "DIES HERE1", Toast.LENGTH_LONG);
             stopCaptureIfRunning(context);
             return;
         }
@@ -49,15 +48,7 @@ public class BluetoothReceiver extends BroadcastReceiver
         if (chargingStatus != BatteryManager.BATTERY_STATUS_CHARGING &&
                 chargingStatus != BatteryManager.BATTERY_STATUS_FULL)
         {
-            Toast.makeText(context, "DIES HERE2", Toast.LENGTH_LONG);
             stopCaptureIfRunning(context);
-            return;
-        }
-        //TODO: testing only charge-based continuous mode
-        if (bluetoothAddress.equals("NOT_CONFIGURED"))
-        {
-            startCaptureIfNotRunning(context);
-            Toast.makeText(context, "DIES HERE3", Toast.LENGTH_LONG);
             return;
         }
         //check if the configured bluetooth device is connected
@@ -95,7 +86,6 @@ public class BluetoothReceiver extends BroadcastReceiver
             {
             }
         }, BluetoothProfile.HEADSET);
-
     }
 
     //this function will send the stop intent to the CaptureService if it's running

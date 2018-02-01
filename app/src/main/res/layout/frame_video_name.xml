@@ -1,0 +1,26 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp"
+    >
+    <EditText
+        android:id="@+id/video_name_edittext"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:hint="@string/video_name_hint"
+        android:maxLength="50"
+        android:selectAllOnFocus="true"
+        />
+    <TextView
+        android:id="@+id/video_name_length_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/video_name_edittext"
+        android:textSize="18sp"
+        tools:text="30 / 50"
+        />
+</RelativeLayout>
