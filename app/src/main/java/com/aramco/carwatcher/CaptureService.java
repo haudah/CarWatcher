@@ -114,6 +114,18 @@ public class CaptureService extends Service
     private boolean firstAlarm;
     //in continuous mode, this is the most recently saved file in the current run
     private File lastVideoFile = null;
+    //a VideoLocationRequest encapsulates a request for location data for a video
+    //that is being captured or was recently captured
+    private class VideoLocationRequest
+    {
+        //the id of the database entry that needs a location (populated if the
+        //video is created before location was obtained)
+        public long videoId;
+        //the location of this video capture (populated after location is obtained)
+        public Location location;
+    }
+    //this is a queue of all the video location requests
+    private LinkedList<VideoLocationRequest> locationQueue;
 
     @Override
     public void onCreate()
@@ -124,6 +136,8 @@ public class CaptureService extends Service
         startBackgroundThread();
         //open the camera for recording
         openCamera();
+        //initialize the location queue
+        locationQueue = new LinkedList<VideoLocationRequest>();
     }
 
     @Override
@@ -210,9 +224,14 @@ public class CaptureService extends Service
         if (!isRecordingVideo)
         {
             //if this is a rotation but there is no capture currently going, do nothing
+            //TODO: that should never happen though??
             if (!rotate)
             {
                 showNotification(userDriven, true);
+                if (userDriven)
+                {
+                    getLocation();
+                }
                 //start the actual recording unless its the firstRun
                 if (!firstRun)
                 {
@@ -257,6 +276,7 @@ public class CaptureService extends Service
                 continuousRecording = true;
                 //show notfication for user-driven
                 showNotification(true, true);
+                getLocation();
             }
         }
 
@@ -353,6 +373,50 @@ public class CaptureService extends Service
             notifyManager.notify(notifyIdContinuous, notifyBuilderContinuous.build());
         }
         wakeScreen(5);
+    }
+
+    /**
+     * Sets up the callback for getting user location. The callback will check if there are any newly
+     * added videos waiting for location data and update the database entries if so. For videos that
+     * have not been completed yet, the locationQueue entries will be populated with location data
+     * so that upon completion, the location is readily available.
+     */
+    private void getLocation()
+    {
+        LocationManager locationManager =
+            (LocationManager)this.getSystemService(Context.LOCATION_SERVICE);
+        LocationListener locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location)
+            {
+                //if the location is not accurate to within 20 meters, reject it
+                if (location.getAccuracy() > 20)
+                {
+                    return;
+                }
+                //its a solid location, check for any queue items awaiting location
+                //data
+                List<VideoLocationRequest> toRemove = new ArrayList<VideoLocationRequest>();
+                for (VideoLocationRequest request : locationQueue)
+                {
+                    //if video was already captured, update the db entry and pop item
+                    //from the queue
+                    if (request.videoId != -1)
+                    {
+                        toRemove.add(request);
+                    }
+                }
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+            @Override
+            public void onProviderEnabled(String provider) {}
+
+            @Override
+            public void onProviderDisabled(String provider) {}
+        };
     }
 
     /**
