@@ -4,7 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -18,11 +20,15 @@ import android.view.MenuItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import io.flic.lib.FlicAppNotInstalledException;
 import io.flic.lib.FlicButton;
 import io.flic.lib.FlicManager;
 import io.flic.lib.FlicManagerInitializedCallback;
+
+import static com.aramco.carwatcher.SettingsActivity.LANGUAGE_SETTING;
+import static com.aramco.carwatcher.SettingsActivity.SETTINGS_FILE;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -32,6 +38,11 @@ public class MainActivity extends AppCompatActivity
     private VideoListFragment videoListFragment;
     //the name of the application's sqllite table
     public final static String TABLE = "CarWatcherTable";
+    //the main bottom navigation view
+    private BottomNavigationView bottomNavigator;
+    //we need to keep track of the current language to know
+    //when a recreation is needed
+    private int language;
     //the main activity should listen for new captured videos from the
     //capture service so it can update displayed results accordingly
     private BroadcastReceiver onNewVideo = new BroadcastReceiver() {
@@ -46,11 +57,15 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        //get the language right away
+        SharedPreferences sharedPref = getSharedPreferences(SETTINGS_FILE, Context.MODE_PRIVATE);
+        language = sharedPref.getInt(LANGUAGE_SETTING, 0);
+        String localeString = (language == 0)? "en" : "ar";
+        String countryString = (language == 0)? "US" : "MA";
+        setLocale(localeString, countryString, false);
         setContentView(R.layout.activity_main);
         //show the app icon in the action bar
-        //getSupportActionBar().setDisplayShowHomeEnabled(true);
-        //getSupportActionBar().setLogo(R.drawable.ic_car_white);
-        //getSupportActionBar().setDisplayUseLogoEnabled(true);
+        getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
         // Add permission for camera and external storage
         // We do this preemptively since the permission is needed in a service
         List<String> permissions = new ArrayList<String>();
@@ -92,7 +107,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         //set up the bottom navigation
-        BottomNavigationView bottomNavigator = (BottomNavigationView)findViewById(R.id.navigation);
+        bottomNavigator = (BottomNavigationView)findViewById(R.id.navigation);
         bottomNavigator.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
@@ -135,6 +150,20 @@ public class MainActivity extends AppCompatActivity
 
         //get the flic button
         //requestFlicButton();
+    }
+
+    private void setLocale(String localeString, String countryString, boolean recreate)
+    {
+        Configuration config = getBaseContext().getResources().getConfiguration();
+        Locale locale = new Locale(localeString, countryString);
+        Locale.setDefault(locale);
+        config.setLocale(locale);
+        config.setLayoutDirection(locale);
+        getBaseContext().getResources().updateConfiguration(config, getBaseContext().getResources().getDisplayMetrics());
+        if (recreate)
+        {
+            recreate();
+        }
     }
 
     private void requestFlicButton()
@@ -182,6 +211,15 @@ public class MainActivity extends AppCompatActivity
         IntentFilter filter = new IntentFilter(CaptureService.ACTION_NEW_VIDEO);
         registerReceiver(onNewVideo, filter);
         refreshFragments();
+        //check if language was changed (meaning recreation is needed)
+        SharedPreferences sharedPref = getSharedPreferences(SETTINGS_FILE, Context.MODE_PRIVATE);
+        int newLanguage = sharedPref.getInt(LANGUAGE_SETTING, 0);
+        if (newLanguage != language)
+        {
+            String localeString = (language == 0)? "en" : "ar";
+            String countryString = (language == 0)? "US" : "MA";
+            setLocale(localeString, countryString, true);
+        }
     }
 
     public void refreshFragments()
@@ -253,5 +291,13 @@ public class MainActivity extends AppCompatActivity
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    /**
+     * Called from the NoContentFragment when the user needs to view captured videos.
+     */
+    public void showCaptured()
+    {
+        bottomNavigator.setSelectedItemId(R.id.navigation_captured);
     }
 }

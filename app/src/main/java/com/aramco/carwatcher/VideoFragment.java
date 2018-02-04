@@ -2,6 +2,7 @@ package com.aramco.carwatcher;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
@@ -67,7 +68,7 @@ public class VideoFragment extends DialogFragment
             }
         });
         //get full path of file using filename
-        String videoFilePath =
+        final String videoFilePath =
             CaptureService.getVideoFilePath(video.getFileName(), getActivity());
         //check if file exists, and if not, offer to delete entry
         File videoFile = new File(videoFilePath);
@@ -96,6 +97,16 @@ public class VideoFragment extends DialogFragment
             submitImageView.setVisibility(View.VISIBLE);
             submittedImageView.setVisibility(View.GONE);
         }
+        thumbnailImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                //when user clicks on video item, play it in the media player
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(videoFilePath));
+                intent.setDataAndType(Uri.parse(videoFilePath), "video/mp4");
+                startActivity(intent);
+            }
+        });
         //use the builder to construct the dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(view);

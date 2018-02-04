@@ -61,7 +61,11 @@
             android:name=".CaptureService"
             android:enabled="true" />
 
-        <activity android:name=".SettingsActivity"></activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/settings"
+            >
+        </activity>
     </application>
 
 </manifest>

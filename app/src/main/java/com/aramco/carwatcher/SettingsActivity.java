@@ -32,7 +32,6 @@ public class SettingsActivity extends AppCompatActivity
     private RadioButton arabicRadioButton;
     private CheckBox bluetoothCheckBox;
     private Spinner pairedNamesSpinner;
-    private Button continuousButton;
     //the current language setting (0: english, 1: arabic)
     private int language;
     //the current bluetooth enabled setting
@@ -40,8 +39,8 @@ public class SettingsActivity extends AppCompatActivity
     //the hardware address of the configured bluetooth device
     private String bluetoothAddress;
     //the keys for shared prefs
-    private final static String LANGUAGE_SETTING = "LANGUAGE_SETTING";
     private final static int REQUEST_BLUETOOTH_PERMISSION = 105;
+    public final static String LANGUAGE_SETTING = "LANGUAGE_SETTING";
     public final static String BLUETOOTH_ENABLED_SETTING = "BLUETOOTH_ENABLED_SETTING";
     public final static String BLUETOOTH_SETTING = "BLUETOOTH_SETTING";
     public final static String SETTINGS_FILE = "CarWatcherSettings";
@@ -62,17 +61,6 @@ public class SettingsActivity extends AppCompatActivity
         arabicRadioButton = (RadioButton)findViewById(R.id.settings_language_arabic);
         bluetoothCheckBox = (CheckBox)findViewById(R.id.settings_bluetooth_enabled);
         pairedNamesSpinner = (Spinner)findViewById(R.id.settings_bluetooth_spinner);
-        continuousButton = (Button)findViewById(R.id.settings_continuous_button);
-        //the continuous button should start the continuous mode
-        continuousButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v)
-            {
-                //this button simulates a continuous capture being triggered
-                Intent intent = CaptureService.newIntent(SettingsActivity.this, true);
-                (SettingsActivity.this).startService(intent);
-            }
-        });
         //get current settings (if they've been configured previously)
         SharedPreferences sharedPref = getSharedPreferences(SETTINGS_FILE, Context.MODE_PRIVATE);
         language = sharedPref.getInt(LANGUAGE_SETTING, 0);

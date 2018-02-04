@@ -14,6 +14,7 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="capture">Capture</string>
+    <string name="view_captured">View Captured</string>
     <string name="stop_capturing">Stop Capturing</string>
     <string name="submitted">Submitted</string>
     <string name="notify_capturing_title">Capturing CarWatcher video</string>
@@ -26,7 +27,7 @@
     <string name="notify_done_continuous_text">Reconnect with vehicle to reactivate</string>
     <string name="notify_channel_name">CarWatcher Notifications</string>
     <string name="notify_channel_description">Notification channel for notifications sent from the CarWatcher application</string>
-    <string name="delete_associated_media">Delete associated media files?</string>
+    <string name="delete_associated_media">Delete associated media files</string>
     <string name="logout">Log Out</string>
     <string name="profile_captured">Captured</string>
     <string name="profile_submitted">Submitted</string>
@@ -35,10 +36,15 @@
     <string name="not_configured">Not Configured</string>
     <string name="video_item_submit">Submit</string>
     <string name="video_item_delete">Delete</string>
-    <string name="video_item_edit"><u>(Edit)</u></string>
     <string name="video_name_hint">Enter video name</string>
     <string name="edit_video_name_message">Edit video name</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="dummy_location">Canyon Road, Dhahran</string>
+    <string name="enabled">Enabled</string>
+    <string name="language">Language</string>
+    <string name="vehicle_integration">Vehicle Integration</string>
+    <string name="english">English</string>
+    <string name="arabic">Arabic</string>
+    <string name="settings">Settings</string>
+    <string name="dhahran_eastern_province">Dhahran, Eastern Province</string>
+    <string name="hani_audah">Hani Audah</string>
 </resources>

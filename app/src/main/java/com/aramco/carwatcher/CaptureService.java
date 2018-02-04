@@ -638,7 +638,7 @@ public class CaptureService extends Service
                             int milliseconds = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
                             int duration = milliseconds / 1000;
                             //TODO: get the actual location
-                            String location = "Canyon Road, Dhahran";
+                            String location = getResources().getString(R.string.dummy_location);
                             Video newVideo = new Video(0, title, videoFileName, duration, location, false);
                             SQLiteDatabase database = new VideoBaseHelper(context).getWritableDatabase();
                             VideoBaseHelper.addVideo(newVideo, database);

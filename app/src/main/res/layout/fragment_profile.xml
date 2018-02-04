@@ -141,7 +141,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="Hani Audah"
+                    android:text="@string/hani_audah"
                     android:textSize="24sp"
                     android:textColor="@color/black"
                     android:layout_gravity="center_horizontal"
@@ -151,7 +151,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
-                    android:text="Dhahran, Eastern Province"
+                    android:text="@string/dhahran_eastern_province"
                     android:textSize="14sp"
                     android:textColor="@color/black"
                     android:layout_gravity="center_horizontal"
@@ -166,14 +166,16 @@
             android:background="@drawable/profile_textarea"
             android:layout_gravity="center_horizontal"
             >
-            <TextView
-                android:layout_width="70dp"
-                android:layout_height="match_parent"
-                android:text="Email"
-                android:textAllCaps="true"
-                android:textColor="@color/darkGrey"
-                android:gravity="center_vertical"
-                />
+            <FrameLayout
+                android:layout_width="50dp"
+                android:layout_height="match_parent">
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_mail_dark_grey"
+                    android:layout_gravity="center_vertical|center_horizontal"
+                    />
+            </FrameLayout>
             <TextView
                 android:layout_width="170dp"
                 android:layout_height="match_parent"
@@ -190,14 +192,16 @@
             android:background="@drawable/profile_textarea"
             android:layout_gravity="center_horizontal"
             >
-            <TextView
-                android:layout_width="70dp"
-                android:layout_height="match_parent"
-                android:text="Phone"
-                android:textAllCaps="true"
-                android:textColor="@color/darkGrey"
-                android:gravity="center_vertical"
-                />
+            <FrameLayout
+                android:layout_width="50dp"
+                android:layout_height="match_parent">
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_mobile_dark_grey"
+                    android:layout_gravity="center_vertical|center_horizontal"
+                    />
+            </FrameLayout>
             <TextView
                 android:layout_width="170dp"
                 android:layout_height="match_parent"
@@ -211,8 +215,8 @@
         android:id="@+id/profile_logout_button"
         android:layout_height="50dp"
         android:layout_width="match_parent"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
         android:layout_alignParentBottom="true"
         android:background="@drawable/no_content_button"

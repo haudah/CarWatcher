@@ -79,37 +79,45 @@ public class NoContentFragment extends Fragment
         {
             case NO_CAPTURED_VIDEOS:
                 promptTextView.setText(R.string.no_captured_videos);
+                fixButton.setText(R.string.capture);
+                //fixButton should start the capture service
+                fixButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        Intent intent = new Intent();
+                        intent.setAction("com.aramco.carwatcher.TOGGLECAPTURE");
+                        //same intent is used for capture/stop capturing
+                        getActivity().sendBroadcast(intent);
+                        if (!capturing)
+                        {
+                            ((Button)v).setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_record_red, 0, 0, 0);
+                            ((Button)v).setText(R.string.stop_capturing);
+                            capturing = true;
+                        }
+                        else
+                        {
+                            ((Button)v).setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                            ((Button)v).setText(R.string.capture);
+                            capturing = false;
+                        }
+                    }
+                });
                 break;
             case NO_SUBMITTED_VIDEOS:
                 promptTextView.setText(R.string.no_submitted_videos);
+                fixButton.setText(R.string.view_captured);
+                //fixButton should start the capture service
+                fixButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        ((MainActivity)getActivity()).showCaptured();
+                    }
+                });
                 break;
         }
 
-        //fixButton should start the capture service
-        fixButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v)
-            {
-                Intent intent = new Intent();
-                intent.setAction("com.aramco.carwatcher.TOGGLECAPTURE");
-                //same intent is used for capture/stop capturing
-                //Intent captureIntent = CaptureService.newIntent(getActivity(), false);
-                //getActivity().startService(intent);
-                getActivity().sendBroadcast(intent);
-                if (!capturing)
-                {
-                    ((Button)v).setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_record_red, 0, 0, 0);
-                    ((Button)v).setText(R.string.stop_capturing);
-                    capturing = true;
-                }
-                else
-                {
-                    ((Button)v).setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-                    ((Button)v).setText(R.string.capture);
-                    capturing = false;
-                }
-            }
-        });
 
         return v;
     }

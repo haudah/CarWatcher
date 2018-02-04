@@ -21,8 +21,8 @@
             android:src="@drawable/video_placeholder"
             />
         <ImageView
-            android:layout_width="90dp"
-            android:layout_height="90dp"
+            android:layout_width="95dp"
+            android:layout_height="95dp"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:scaleType="fitCenter"
@@ -39,6 +39,7 @@
             android:padding="6dp"
             android:src="@drawable/ic_play_circle_white"
             android:alpha="0.3"
+            android:visibility="gone"
             />
     </RelativeLayout>
     <LinearLayout
@@ -53,7 +54,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/list_item_video_name_textview"
             android:layout_marginTop="4dp"
-            android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp"
             >
             <TextView
                 android:id="@+id/video_item_name_textview"
@@ -68,7 +69,7 @@
                 android:id="@+id/video_item_name_edit_imageview"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_marginLeft="7dp"
+                android:layout_marginStart="7dp"
                 android:layout_gravity="center_vertical"
                 android:src="@drawable/ic_edit_grey"
                 />
@@ -78,7 +79,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/list_item_video_name_textview"
             android:layout_marginTop="4dp"
-            android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp"
             >
             <ImageView
                 android:layout_width="15dp"
@@ -93,7 +94,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:textAllCaps="false"
-                android:layout_marginLeft="4dp"
+                android:layout_marginStart="4dp"
                 tools:text="00m:00s"
                 />
         </LinearLayout>
@@ -102,7 +103,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/list_item_clock_container"
             android:layout_marginTop="2dp"
-            android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp"
             >
             <ImageView
                 android:layout_width="15dp"
@@ -116,7 +117,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="4dp"
+                android:layout_marginStart="4dp"
                 tools:text="Prince Faisal St., Dhahran"
                 />
         </LinearLayout>
@@ -146,7 +147,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="6dp"
+                    android:layout_marginStart="6dp"
                     android:text="@string/video_item_delete"
                     android:textAllCaps="true"
                     android:textStyle="bold"
@@ -182,7 +183,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="6dp"
+                    android:layout_marginStart="6dp"
                     android:text="@string/video_item_submit"
                     android:textAllCaps="true"
                     android:textStyle="bold"

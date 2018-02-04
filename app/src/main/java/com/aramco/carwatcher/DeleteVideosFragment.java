@@ -31,7 +31,6 @@ public class DeleteVideosFragment extends DialogFragment
         final List<Video> videos = getArguments().getParcelableArrayList("ARG_VIDEOS");
         //get the message string
         String message = getResources().getString(R.string.delete_videos_message);
-        message = String.format(message, 10);
         //use the builder to construct the dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(message)
