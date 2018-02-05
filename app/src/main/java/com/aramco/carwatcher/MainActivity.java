@@ -209,6 +209,7 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         //on resume we should register the broadcast receiver and refresh the list of videos
         IntentFilter filter = new IntentFilter(CaptureService.ACTION_NEW_VIDEO);
+        IntentFilter filterLocation = new IntentFilter(CaptureService.ACTION_VIDEO_GEOCODE);
         registerReceiver(onNewVideo, filter);
         refreshFragments();
         //check if language was changed (meaning recreation is needed)

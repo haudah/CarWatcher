@@ -21,11 +21,15 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -46,6 +50,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -66,6 +71,7 @@ public class CaptureService extends Service
     private static final String EXTRA_SET_STOPPED = "EXTRA_SET_STOPPED";
     //the interval (in seconds) for recorder rotation during continuous capture mode
     private static final long ROTATION_INTERVAL = TimeUnit.SECONDS.toMillis(500);
+    //the action sent when a new video is captured
     public static final String ACTION_NEW_VIDEO = "com.aramco.carwatcher.CHECK_VIDEOS";
     //the opened camera device
     private CameraDevice cameraDevice;
@@ -118,11 +124,12 @@ public class CaptureService extends Service
     //that is being captured or was recently captured
     private class VideoLocationRequest
     {
-        //the id of the database entry that needs a location (populated if the
+        //video entry that needs a location (populated if the
         //video is created before location was obtained)
-        public long videoId;
+        public Video video;
         //the location of this video capture (populated after location is obtained)
         public Location location;
+        //the address
     }
     //this is a queue of all the video location requests
     private LinkedList<VideoLocationRequest> locationQueue;
@@ -228,10 +235,6 @@ public class CaptureService extends Service
             if (!rotate)
             {
                 showNotification(userDriven, true);
-                if (userDriven)
-                {
-                    getLocation();
-                }
                 //start the actual recording unless its the firstRun
                 if (!firstRun)
                 {
@@ -276,7 +279,6 @@ public class CaptureService extends Service
                 continuousRecording = true;
                 //show notfication for user-driven
                 showNotification(true, true);
-                getLocation();
             }
         }
 
@@ -381,7 +383,7 @@ public class CaptureService extends Service
      * have not been completed yet, the locationQueue entries will be populated with location data
      * so that upon completion, the location is readily available.
      */
-    private void getLocation()
+    private void getLocation(final Context context)
     {
         LocationManager locationManager =
             (LocationManager)this.getSystemService(Context.LOCATION_SERVICE);
@@ -399,13 +401,29 @@ public class CaptureService extends Service
                 List<VideoLocationRequest> toRemove = new ArrayList<VideoLocationRequest>();
                 for (VideoLocationRequest request : locationQueue)
                 {
-                    //if video was already captured, update the db entry and pop item
-                    //from the queue
-                    if (request.videoId != -1)
+                    //if video was already captured but not yet located,
+                    //update the db entry and pop item from the queue
+                    if (request.video != null && request.video.getLatLng() != null)
                     {
+                        SQLiteDatabase database = new VideoBaseHelper(context).getWritableDatabase();
+                        VideoBaseHelper.geocodeVideo(request.video,
+                                location.getLatitude(), location.getLongitude(), database);
                         toRemove.add(request);
                     }
+                    //if video is not done capturing, just store the location and wait for
+                    //the onReady method to fetch it when creating the db entry
+                    else
+                    {
+                        request.location = location;
+                    }
                 }
+
+                //now go through the videos, removing them from the queue
+                for (VideoLocationRequest request : toRemove)
+                {
+                    locationQueue.remove(request);
+                }
+                //now we need to reverse geocode to get location string
             }
 
             @Override
@@ -702,8 +720,18 @@ public class CaptureService extends Service
                             int milliseconds = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
                             int duration = milliseconds / 1000;
                             //TODO: get the actual location
-                            String location = getResources().getString(R.string.dummy_location);
-                            Video newVideo = new Video(0, title, videoFileName, duration, location, false);
+                            LatLng latLng = null;
+                            String address = getResources().getString(R.string.getting_location);
+                            //check if location was already obtained during capture; note that if it was, it would be in the
+                            //last element added to the location queue
+                            if (locationQueue.getLast().location != null)
+                            {
+                                Location location = locationQueue.getLast().location;
+                                latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                                //address string will simply be the coordinates until the actual address is obtained
+                                address = String.format("%.6f,%.6f", latLng.getLatitude(), latLng.getLongitude());
+                            }
+                            Video newVideo = new Video(0, title, videoFileName, duration, address, false, latLng);
                             SQLiteDatabase database = new VideoBaseHelper(context).getWritableDatabase();
                             VideoBaseHelper.addVideo(newVideo, database);
                             //when done creating a video, send a broadcast intent for interested listeners

@@ -39,6 +39,7 @@
     <string name="video_name_hint">Enter video name</string>
     <string name="edit_video_name_message">Edit video name</string>
     <string name="dummy_location">Canyon Road, Dhahran</string>
+    <string name="getting_location">Getting Location</string>
     <string name="enabled">Enabled</string>
     <string name="language">Language</string>
     <string name="vehicle_integration">Vehicle Integration</string>

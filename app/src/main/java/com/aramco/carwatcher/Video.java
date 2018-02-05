@@ -1,5 +1,6 @@
 package com.aramco.carwatcher;
 
+import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -12,7 +13,8 @@ public class Video implements Parcelable
     private String fileName;
     private int duration;
     private boolean submitted;
-    private String location;
+    private String address;
+    private LatLng latLng;
 
     /**
      * Constructor taking all the required parameters.
@@ -21,16 +23,20 @@ public class Video implements Parcelable
      * @param title the name given to the captured video
      * @param fileName name of the video file
      * @param duration the duration of the video (in seconds)
+     * @param address the address where the video was captured
      * @param submitted whether or not this video was submitted to CarWatcher
+     * @param latLng the lat/lng where this video was captured
      */
-    public Video(long id, String title, String fileName, int duration, String location, boolean submitted)
+    public Video(long id, String title, String fileName, int duration, String address,
+            boolean submitted, LatLng latLng)
     {
         this.id = id;
         this.title = title;
         this.fileName = fileName;
         this.duration = duration;
-        this.location = location;
+        this.address = address;
         this.submitted = submitted;
+        this.latLng = latLng;
     }
 
     /**
@@ -76,9 +82,14 @@ public class Video implements Parcelable
         return submitted;
     }
 
-    public String getLocation()
+    public LatLng getLatLng()
     {
-        return location;
+        return latLng;
+    }
+
+    public String getAddress()
+    {
+        return address;
     }
 
     //PARCELABLE IMPLEMENTATION
@@ -90,7 +101,8 @@ public class Video implements Parcelable
         dest.writeString(fileName);
         dest.writeInt(duration);
         dest.writeInt((submitted)? 1 : 0);
-        dest.writeString(location);
+        dest.writeString(address);
+        dest.writeParcelable(latLng, flags);
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator()
@@ -113,7 +125,8 @@ public class Video implements Parcelable
         fileName = source.readString();
         duration = source.readInt();
         submitted = source.readInt() != 0;
-        location = source.readString();
+        address = source.readString();
+        latLng = source.readParcelable(LatLng.class.getClassLoader());
     }
 
     @Override

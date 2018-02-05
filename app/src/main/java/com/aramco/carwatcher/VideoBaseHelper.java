@@ -26,10 +26,13 @@ public class VideoBaseHelper extends SQLiteOpenHelper
         db.execSQL("CREATE TABLE " + VideoDbSchema.VideoTable.NAME + "(" +
                 "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 VideoTable.Cols.TITLE + " CHAR(20), " +
-                VideoTable.Cols.LOCATION + " VARCHAR(100), " +
-                VideoTable.Cols.DURATION + " INTEGER, " +
                 VideoTable.Cols.FILE_NAME + " CHAR(50), " +
-                VideoTable.Cols.SUBMITTED + " INTEGER)");
+                VideoTable.Cols.DURATION + " INTEGER, " +
+                VideoTable.Cols.SUBMITTED + " INTEGER, " +
+                VideoTable.Cols.ADDRESS + " VARCHAR(100), " +
+                VideoTable.Cols.LATITUDE + " DOUBLE, " +
+                VideoTable.Cols.LONGITUDE + " DOUBLE)"
+                );
     }
 
     @Override
@@ -90,11 +93,22 @@ public class VideoBaseHelper extends SQLiteOpenHelper
     {
         ContentValues values = new ContentValues();
         values.put(VideoTable.Cols.TITLE, video.getTitle());
-        values.put(VideoTable.Cols.LOCATION, video.getLocation());
-        values.put(VideoTable.Cols.DURATION, video.getDuration());
         values.put(VideoTable.Cols.FILE_NAME, video.getFileName());
+        values.put(VideoTable.Cols.DURATION, video.getDuration());
         values.put(VideoTable.Cols.SUBMITTED, video.isSubmitted());
-
+        values.put(VideoTable.Cols.ADDRESS, video.getAddress());
+        //special treatment for LatLng
+        LatLng latLng = video.getLatLng();
+        if (latLng != null)
+        {
+            values.put(VideoTable.Cols.LATITUDE, latLng.getLatitude());
+            values.put(VideoTable.Cols.LONGITUDE, latLng.getLongitude());
+        }
+        else
+        {
+            values.put(VideoTable.Cols.LATITUDE, -1);
+            values.put(VideoTable.Cols.LONGITUDE, -1);
+        }
         return values;
     }
 
@@ -122,13 +136,28 @@ public class VideoBaseHelper extends SQLiteOpenHelper
      * Updates the title of the specified video to the specified string.
      *
      * @param video the video whose title is to be updated
-     * @param title the new title of the video
      * @param database the database containing the video to be updated
      */
     public static boolean editVideoTitle(Video video, SQLiteDatabase database)
     {
         ContentValues values = new ContentValues();
         values.put(VideoTable.Cols.TITLE, video.getTitle());
+        String id = Long.toString(video.getId());
+        return (database.update(VideoTable.NAME, values, "_id=?", new String[] {id}) == 1);
+    }
+
+    /**
+     * Sets the latitude/longitude of a video entry.
+     *
+     * @param latitude the latitude of the capture location
+     * @param longitude the longitude of the capture location
+     */
+    public static boolean geocodeVideo(Video video, double latitude,
+            double longitude, SQLiteDatabase database)
+    {
+        ContentValues values = new ContentValues();
+        values.put(VideoTable.Cols.LATITUDE, latitude);
+        values.put(VideoTable.Cols.LONGITUDE, longitude);
         String id = Long.toString(video.getId());
         return (database.update(VideoTable.NAME, values, "_id=?", new String[] {id}) == 1);
     }
