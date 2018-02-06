@@ -163,6 +163,19 @@ public class VideoBaseHelper extends SQLiteOpenHelper
     }
 
     /**
+     * Sets the address of a video entry.
+     *
+     * @param address the address of the capture location.
+     */
+    public static boolean addressVideo(Video video, String address, SQLiteDatabase database)
+    {
+        ContentValues values = new ContentValues();
+        values.put(VideoTable.Cols.ADDRESS, address);
+        String id = Long.toString(video.getId());
+        return (database.update(VideoTable.NAME, values, "_id=?", new String[] {id}) == 1);
+    }
+
+    /**
      * Submits a video to the virtual backend.
      */
     public static boolean submitVideos(List<Video> videos, SQLiteDatabase database)

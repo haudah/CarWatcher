@@ -1,5 +1,7 @@
 package com.aramco.carwatcher;
 
+import android.os.AsyncTask;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,7 +21,7 @@ public class ApiConnector
         "https://maps.googleapis.com/maps/api/geocode/json?latlng=%.6f,%.6f&key=%s";
 
     //this async task is used for making api calls on a separate thread
-    private class RequestTask extends AsyncTask<Object, Void, String>
+    private class RequestTask extends AsyncTask<Void, Void, String>
     {
         //the coordinates that will be reverse geocoded
         private double latitude;
@@ -35,7 +37,8 @@ public class ApiConnector
             this.listener = listener;
         }
 
-        protected String doInBackground()
+        @Override
+        protected String doInBackground(Void... params)
         {
             try
             {
@@ -80,17 +83,18 @@ public class ApiConnector
                 }
                 return null;
             }
-        catch (IOException e)
-        {
-            return null;
-        }
-        catch (JSONException e)
-        {
-            return null;
-        }
+            catch (IOException e)
+            {
+                return null;
+            }
+            catch (JSONException e)
+            {
+                return null;
+            }
         }
 
-        protected String onPostExecute(String result)
+        @Override
+        protected void onPostExecute(String result)
         {
             //if result is null, there must have been an error
             if (result == null)
@@ -107,7 +111,7 @@ public class ApiConnector
     /**
      * Get the address corresponding to the specified latitude and longitude coordinates.
      */
-    public static String getAddress(double latitude, double longitude, GetAddressListener listener)
+    public void getAddress(double latitude, double longitude, GetAddressListener listener)
     {
         //create an async task for getting the string
         RequestTask task = new RequestTask(latitude, longitude, listener);

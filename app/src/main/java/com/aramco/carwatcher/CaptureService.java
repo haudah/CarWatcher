@@ -135,6 +135,8 @@ public class CaptureService extends Service
     private LinkedList<VideoLocationRequest> locationQueue;
     //this will be true when a location listener is currently listening
     private boolean updatingLocation = false;
+    //the api connector used to reverse geocode locations
+    private ApiConnector apiConnector;
 
     @Override
     public void onCreate()
@@ -147,6 +149,7 @@ public class CaptureService extends Service
         openCamera();
         //initialize the location queue
         locationQueue = new LinkedList<VideoLocationRequest>();
+        apiConnector = new ApiConnector();
     }
 
     @Override
@@ -418,14 +421,14 @@ public class CaptureService extends Service
                     return;
                 }
                 //its a solid location, check for any queue items awaiting location data
-                List<VideoLocationRequest> toRemove = new ArrayList<VideoLocationRequest>();
+                final List<VideoLocationRequest> toRemove = new ArrayList<VideoLocationRequest>();
                 //if any already captured videos were located, the list needs refresh
                 boolean needsRefresh = false;
                 for (VideoLocationRequest request : locationQueue)
                 {
                     //if video was already captured but not yet located,
                     //update the db entry and pop item from the queue
-                    if (request.video != null && request.video.getLatLng() != null)
+                    if (request.video != null && request.video.getLatLng() == null)
                     {
                         SQLiteDatabase database = new VideoBaseHelper(context).getWritableDatabase();
                         VideoBaseHelper.geocodeVideo(request.video,
@@ -451,12 +454,34 @@ public class CaptureService extends Service
                 {
                     sendBroadcast(new Intent(ACTION_NEW_VIDEO));
                 }
-                //all except possibly one element of the queue were already created in db, keep a record of that one
+                //if there is still one video being captured (i.e. in the queue) then keep a record of it
+                //so its address can be set
+                if (locationQueue.size() > 0)
+                {
+                    toRemove.add(locationQueue.getLast());
+                }
                 //now we need to reverse geocode to get location string
-                ApiConnector.getAddress(location.getLatitude(), location.getLongitude(), new GetAddressListener() {
+                apiConnector.getAddress(location.getLatitude(), location.getLongitude(), new GetAddressListener() {
                     @Override
                     public void onResponse(String address)
                     {
+                        SQLiteDatabase database = new VideoBaseHelper(context).getWritableDatabase();
+                        //if we're getting the location of some already captured video(s),
+                        //update the db entries
+                        for (VideoLocationRequest request : toRemove)
+                        {
+                            //check for null in case an element was being captured and still didn't finish
+                            if (request.video != null)
+                            {
+                                VideoBaseHelper.addressVideo(request.video, address, database);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onErrorResponse()
+                    {
+                        //do nothing and hope for the best
                     }
                 });
 
