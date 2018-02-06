@@ -133,6 +133,8 @@ public class CaptureService extends Service
     }
     //this is a queue of all the video location requests
     private LinkedList<VideoLocationRequest> locationQueue;
+    //this will be true when a location listener is currently listening
+    private boolean updatingLocation = false;
 
     @Override
     public void onCreate()
@@ -235,6 +237,7 @@ public class CaptureService extends Service
             if (!rotate)
             {
                 showNotification(userDriven, true);
+                getLocation(this);
                 //start the actual recording unless its the firstRun
                 if (!firstRun)
                 {
@@ -278,6 +281,7 @@ public class CaptureService extends Service
             {
                 continuousRecording = true;
                 //show notfication for user-driven
+                getLocation(this);
                 showNotification(true, true);
             }
         }
@@ -383,22 +387,40 @@ public class CaptureService extends Service
      * have not been completed yet, the locationQueue entries will be populated with location data
      * so that upon completion, the location is readily available.
      */
+    private int attempt = 0;
     private void getLocation(final Context context)
     {
-        LocationManager locationManager =
+        //add new location request to the queue
+        locationQueue.add(new VideoLocationRequest());
+        //we might still be getting location for a previous capture
+        if (updatingLocation)
+        {
+            //and if so, we just a new entry on the queue..wait for the location listener
+            //to update it
+            return;
+        }
+        //we'll now be getting location updates
+        updatingLocation = true;
+        attempt = 0;
+        final LocationManager locationManager =
             (LocationManager)this.getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location)
             {
                 //if the location is not accurate to within 20 meters, reject it
-                if (location.getAccuracy() > 20)
+                //also, I noticed some trailing calls after removing the listener, so make sure
+                //updaingLocation is actually true
+                //TODO: for testing, I'll just accept the fourth attempt, no matter how inaccurate
+                if (location.getAccuracy() > 20 && updatingLocation && attempt < 3)
                 {
+                    attempt++;
                     return;
                 }
-                //its a solid location, check for any queue items awaiting location
-                //data
+                //its a solid location, check for any queue items awaiting location data
                 List<VideoLocationRequest> toRemove = new ArrayList<VideoLocationRequest>();
+                //if any already captured videos were located, the list needs refresh
+                boolean needsRefresh = false;
                 for (VideoLocationRequest request : locationQueue)
                 {
                     //if video was already captured but not yet located,
@@ -409,6 +431,7 @@ public class CaptureService extends Service
                         VideoBaseHelper.geocodeVideo(request.video,
                                 location.getLatitude(), location.getLongitude(), database);
                         toRemove.add(request);
+                        needsRefresh = true;
                     }
                     //if video is not done capturing, just store the location and wait for
                     //the onReady method to fetch it when creating the db entry
@@ -423,7 +446,25 @@ public class CaptureService extends Service
                 {
                     locationQueue.remove(request);
                 }
+                //if refresh is needed, send the broadcast
+                if (needsRefresh)
+                {
+                    sendBroadcast(new Intent(ACTION_NEW_VIDEO));
+                }
+                //all except possibly one element of the queue were already created in db, keep a record of that one
                 //now we need to reverse geocode to get location string
+                ApiConnector.getAddress(location.getLatitude(), location.getLongitude(), new GetAddressListener() {
+                    @Override
+                    public void onResponse(String address)
+                    {
+                    }
+                });
+
+                //once an accurate location is obtained, there is no need to listen for further
+                //location changes..the next capture will retrigger listening
+                locationManager.removeUpdates(this);
+                //done updating location
+                updatingLocation = false;
             }
 
             @Override
@@ -435,6 +476,8 @@ public class CaptureService extends Service
             @Override
             public void onProviderDisabled(String provider) {}
         };
+        //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
     }
 
     /**

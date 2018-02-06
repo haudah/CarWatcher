@@ -11,7 +11,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8ff6026c-69ed-4656-8640-3d96dced43dc" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/.VideoBaseHelper.java.swp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/.ApiConnector.java.swp" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/4.1/fileHashes/fileHashes.bin" afterPath="$PROJECT_DIR$/.gradle/4.1/fileHashes/fileHashes.bin" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/4.1/fileHashes/fileHashes.lock" afterPath="$PROJECT_DIR$/.gradle/4.1/fileHashes/fileHashes.lock" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/4.1/javaCompile/classAnalysis.bin" afterPath="$PROJECT_DIR$/.gradle/4.1/javaCompile/classAnalysis.bin" />
@@ -20,16 +20,14 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/4.1/taskHistory/fileSnapshots.bin" afterPath="$PROJECT_DIR$/.gradle/4.1/taskHistory/fileSnapshots.bin" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/4.1/taskHistory/taskHistory.bin" afterPath="$PROJECT_DIR$/.gradle/4.1/taskHistory/taskHistory.bin" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/4.1/taskHistory/taskHistory.lock" afterPath="$PROJECT_DIR$/.gradle/4.1/taskHistory/taskHistory.lock" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/com_android_support_constraint_constraint_layout_solver_1_0_2_jar.xml" afterPath="$PROJECT_DIR$/.idea/libraries/com_android_support_constraint_constraint_layout_solver_1_0_2_jar.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/ApiConnector.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/ApiConnector.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/MainActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/MainActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/Video.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/Video.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoBaseHelper.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoBaseHelper.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoCursorWrapper.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoCursorWrapper.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoDbSchema.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoDbSchema.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoFragment.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoFragment.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoListFragment.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoListFragment.java" />
     </list>
     <ignored path="$PROJECT_DIR$/build/classes/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -57,11 +55,9 @@
       <file leaf-file-name="MainActivity.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/MainActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="230">
-              <caret line="64" column="8" lean-forward="false" selection-start-line="64" selection-start-column="8" selection-end-line="64" selection-end-column="8" />
-              <folding>
-                <marker date="1517823422666" expanded="true" signature="11802:11808" ph="{...}" />
-              </folding>
+            <state relative-caret-position="207">
+              <caret line="159" column="33" lean-forward="false" selection-start-line="159" selection-start-column="33" selection-end-line="159" selection-end-column="33" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -69,24 +65,54 @@
       <file leaf-file-name="CaptureService.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-5025">
-              <caret line="407" column="48" lean-forward="false" selection-start-line="407" selection-start-column="48" selection-end-line="407" selection-end-column="48" />
+            <state relative-caret-position="380">
+              <caret line="773" column="0" lean-forward="false" selection-start-line="773" selection-start-column="0" selection-end-line="773" selection-end-column="0" />
               <folding>
-                <marker date="1517832434160" expanded="true" signature="29753:29920" ph="//..." />
-                <marker date="1517832434160" expanded="true" signature="31690:31810" ph="//..." />
-                <marker date="1517832434160" expanded="true" signature="32367:32589" ph="//..." />
-                <marker date="1517832434160" expanded="true" signature="32773:33024" ph="//..." />
-                <marker date="1517832434160" expanded="true" signature="33666:33719" ph="/**...*/" />
-                <marker date="1517832434160" expanded="true" signature="33813:34405" ph="{...}" />
-                <marker date="1517832434160" expanded="true" signature="34411:34456" ph="/**...*/" />
-                <marker date="1517832434160" expanded="true" signature="34494:34953" ph="{...}" />
-                <marker date="1517832434160" expanded="true" signature="35035:35126" ph="{...}" />
-                <marker date="1517832434160" expanded="true" signature="35132:35193" ph="/**...*/" />
-                <marker date="1517832434160" expanded="true" signature="35264:35740" ph="{...}" />
-                <marker date="1517832434160" expanded="true" signature="35746:36000" ph="/**...*/" />
-                <marker date="1517832434160" expanded="true" signature="36081:36259" ph="{...}" />
-                <marker date="1517832434160" expanded="true" signature="36265:36441" ph="/**...*/" />
-                <marker date="1517832434160" expanded="true" signature="36487:37053" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="21209:21384" ph="/**...*/" />
+                <marker date="1517921366454" expanded="true" signature="21448:22162" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="22168:22240" ph="/**...*/" />
+                <marker date="1517921366454" expanded="true" signature="22286:22314" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="22320:22384" ph="/**...*/" />
+                <marker date="1517921366454" expanded="true" signature="22430:22608" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="22614:22677" ph="/**...*/" />
+                <marker date="1517921366454" expanded="true" signature="22722:23004" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="23010:23098" ph="/**...*/" />
+                <marker date="1517921366454" expanded="true" signature="23191:23901" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="23284:23425" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="23524:23656" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="23759:23895" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="23807:23885" ph="//..." />
+                <marker date="1517921366454" expanded="true" signature="23908:24062" ph="/**...*/" />
+                <marker date="1517921366454" expanded="true" signature="24161:25422" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="24372:24457" ph="//..." />
+                <marker date="1517921366454" expanded="true" signature="25428:25602" ph="/**...*/" />
+                <marker date="1517921366454" expanded="true" signature="25663:25973" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="25979:26090" ph="/**...*/" />
+                <marker date="1517921366454" expanded="true" signature="26125:27286" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="27292:27367" ph="/**...*/" />
+                <marker date="1517921366454" expanded="true" signature="27403:27969" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="27975:28029" ph="/**...*/" />
+                <marker date="1517921366454" expanded="true" signature="28073:35422" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="28951:35167" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="29079:29321" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="29454:29518" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="29641:35153" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="30394:30922" ph="//..." />
+                <marker date="1517921366454" expanded="true" signature="31734:31901" ph="//..." />
+                <marker date="1517921366454" expanded="true" signature="33671:33791" ph="//..." />
+                <marker date="1517921366454" expanded="true" signature="34348:34570" ph="//..." />
+                <marker date="1517921366454" expanded="true" signature="34754:35005" ph="//..." />
+                <marker date="1517921366454" expanded="true" signature="35647:35700" ph="/**...*/" />
+                <marker date="1517921366454" expanded="true" signature="35794:36386" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="36392:36437" ph="/**...*/" />
+                <marker date="1517921366454" expanded="true" signature="36475:36934" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="37016:37107" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="37113:37174" ph="/**...*/" />
+                <marker date="1517921366454" expanded="true" signature="37245:37721" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="37727:37981" ph="/**...*/" />
+                <marker date="1517921366454" expanded="true" signature="38062:38240" ph="{...}" />
+                <marker date="1517921366454" expanded="true" signature="38246:38422" ph="/**...*/" />
+                <marker date="1517921366454" expanded="true" signature="38468:39034" ph="{...}" />
               </folding>
             </state>
           </provider>
@@ -114,31 +140,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="VideoNameFragment.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoNameFragment.java">
+      <file leaf-file-name="VideoListFragment.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoListFragment.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="236">
-              <caret line="51" column="83" lean-forward="false" selection-start-line="51" selection-start-column="83" selection-end-line="51" selection-end-column="83" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="VideoFragment.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoFragment.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="601">
-              <caret line="149" column="56" lean-forward="false" selection-start-line="149" selection-start-column="56" selection-end-line="149" selection-end-column="56" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ApiConnector.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/ApiConnector.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="299">
-              <caret line="50" column="24" lean-forward="false" selection-start-line="50" selection-start-column="24" selection-end-line="50" selection-end-column="24" />
+            <state relative-caret-position="408">
+              <caret line="196" column="53" lean-forward="false" selection-start-line="196" selection-start-column="53" selection-end-line="196" selection-end-column="53" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -146,11 +152,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="VideoBaseHelper.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="VideoFragment.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoFragment.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="196">
+              <caret line="57" column="38" lean-forward="false" selection-start-line="57" selection-start-column="38" selection-end-line="57" selection-end-column="38" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="VideoBaseHelper.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoBaseHelper.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="248">
-              <caret line="145" column="33" lean-forward="true" selection-start-line="145" selection-start-column="33" selection-end-line="145" selection-end-column="33" />
+            <state relative-caret-position="374">
+              <caret line="72" column="0" lean-forward="true" selection-start-line="72" selection-start-column="0" selection-end-line="72" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -190,8 +206,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>isrecordingvideo = true</find>
-      <find>interval</find>
       <find>context</find>
       <find>setalarm</find>
       <find>stopcapture</find>
@@ -218,8 +232,10 @@
       <find>setlocale</find>
       <find>rsa</find>
       <find>continuousbutton</find>
-      <find>getlocation</find>
       <find>geocodeVid</find>
+      <find>removeUpd</find>
+      <find>getlocation</find>
+      <find>videobasehelper</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -2803,24 +2819,24 @@
         <option value="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/BluetoothReceiver.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/NoContentFragment.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoListFragment.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/frame_video_name.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_settings.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_no_content.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/DeleteVideosFragment.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/MainActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/menu/menu_main.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/SettingsActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_profile.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoNameFragment.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/list_item_captured_video.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/frame_video.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoFragment.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/LatLng.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/Video.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoBaseHelper.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/ApiConnector.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/MainActivity.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoListFragment.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoFragment.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java" />
       </list>
     </option>
   </component>
@@ -3007,7 +3023,7 @@
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
-    <property name="device.picker.selection" value="4200f21ddc3fa3e3" />
+    <property name="device.picker.selection" value="1725c071" />
     <property name="android.profiler.active" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
@@ -3102,7 +3118,7 @@
       <option name="ACTIVITY_CLASS" value="" />
       <method>
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1517835624817" />
+        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1517921370018" />
       </method>
     </configuration>
     <configuration default="true" type="AndroidTestRunConfigurationType" factoryName="Android Instrumented Tests">
@@ -3150,7 +3166,7 @@
       </Profilers>
       <method>
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1517835624818" />
+        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1517921370018" />
       </method>
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
@@ -3333,7 +3349,7 @@
       <option name="ACTIVITY_CLASS" value="" />
       <method>
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1517835624818" />
+        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1517921370018" />
       </method>
     </configuration>
     <list size="1">
@@ -3393,9 +3409,9 @@
       <window_info id="Inspection Results" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32900432" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Device File Explorer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39718616" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.39718616" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32962137" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.30844155" sideWeight="0.4946695" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30844155" sideWeight="0.4946695" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -3458,19 +3474,19 @@
         </line-breakpoint>
         <line-breakpoint type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java</url>
-          <line>467</line>
+          <line>505</line>
           <properties />
           <option name="timeStamp" value="54" />
         </line-breakpoint>
         <line-breakpoint type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java</url>
-          <line>359</line>
+          <line>363</line>
           <properties />
           <option name="timeStamp" value="62" />
         </line-breakpoint>
         <line-breakpoint type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java</url>
-          <line>172</line>
+          <line>174</line>
           <properties />
           <option name="timeStamp" value="103" />
         </line-breakpoint>
@@ -3481,45 +3497,42 @@
           <option name="timeStamp" value="119" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java</url>
-          <line>239</line>
-          <properties />
-          <option name="timeStamp" value="133" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java</url>
-          <line>346</line>
-          <properties />
-          <option name="timeStamp" value="138" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoNameFragment.java</url>
           <line>102</line>
           <properties />
           <option name="timeStamp" value="141" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/MainActivity.java</url>
-          <line>158</line>
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java</url>
+          <line>393</line>
           <properties />
-          <option name="timeStamp" value="142" />
+          <option name="timeStamp" value="145" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java</url>
+          <line>414</line>
+          <properties />
+          <option name="timeStamp" value="147" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java</url>
+          <line>764</line>
+          <properties />
+          <option name="timeStamp" value="148" />
         </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="143" />
+      <option name="time" value="149" />
     </breakpoint-manager>
-    <watches-manager />
+    <watches-manager>
+      <configuration name="app">
+        <watch expression="location" language="JAVA" />
+      </configuration>
+    </watches-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/AutoFitTextureView.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-232">
-          <caret line="16" column="29" lean-forward="false" selection-start-line="16" selection-start-column="29" selection-end-line="16" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable-hdpi/ic_shutter_dark_grey.png">
       <provider selected="true" editor-type-id="images">
         <state />
@@ -3718,16 +3731,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoListFragment.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="196">
-          <caret line="213" column="51" lean-forward="false" selection-start-line="213" selection-start-column="51" selection-end-line="213" selection-end-column="51" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/frame_video_name.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="408">
@@ -3802,16 +3805,6 @@
         <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/MainActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="230">
-          <caret line="64" column="8" lean-forward="false" selection-start-line="64" selection-start-column="8" selection-end-line="64" selection-end-column="8" />
-          <folding>
-            <marker date="1517823422666" expanded="true" signature="11802:11808" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_video_list.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="187">
@@ -3883,14 +3876,6 @@
       </provider>
     </entry>
     <entry file="android-dummy://C:/Users/Administrator/AndroidStudioProjects/CarWatcher/app/Translations Editor" />
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoFragment.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="601">
-          <caret line="149" column="56" lean-forward="false" selection-start-line="149" selection-start-column="56" selection-end-line="149" selection-end-column="56" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/LatLng.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-228">
@@ -3909,45 +3894,107 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/ApiConnector.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="544">
+          <caret line="50" column="24" lean-forward="false" selection-start-line="50" selection-start-column="24" selection-end-line="50" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoListFragment.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="408">
+          <caret line="196" column="53" lean-forward="false" selection-start-line="196" selection-start-column="53" selection-end-line="196" selection-end-column="53" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoFragment.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="196">
+          <caret line="57" column="38" lean-forward="false" selection-start-line="57" selection-start-column="38" selection-end-line="57" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/MainActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="207">
+          <caret line="159" column="33" lean-forward="false" selection-start-line="159" selection-start-column="33" selection-end-line="159" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Android/Sdk/sources/android-27/android/location/LocationManager.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="177">
+          <caret line="280" column="0" lean-forward="false" selection-start-line="280" selection-start-column="0" selection-end-line="280" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/CaptureService.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-5025">
-          <caret line="407" column="48" lean-forward="false" selection-start-line="407" selection-start-column="48" selection-end-line="407" selection-end-column="48" />
+        <state relative-caret-position="380">
+          <caret line="773" column="0" lean-forward="false" selection-start-line="773" selection-start-column="0" selection-end-line="773" selection-end-column="0" />
           <folding>
-            <marker date="1517832434160" expanded="true" signature="29753:29920" ph="//..." />
-            <marker date="1517832434160" expanded="true" signature="31690:31810" ph="//..." />
-            <marker date="1517832434160" expanded="true" signature="32367:32589" ph="//..." />
-            <marker date="1517832434160" expanded="true" signature="32773:33024" ph="//..." />
-            <marker date="1517832434160" expanded="true" signature="33666:33719" ph="/**...*/" />
-            <marker date="1517832434160" expanded="true" signature="33813:34405" ph="{...}" />
-            <marker date="1517832434160" expanded="true" signature="34411:34456" ph="/**...*/" />
-            <marker date="1517832434160" expanded="true" signature="34494:34953" ph="{...}" />
-            <marker date="1517832434160" expanded="true" signature="35035:35126" ph="{...}" />
-            <marker date="1517832434160" expanded="true" signature="35132:35193" ph="/**...*/" />
-            <marker date="1517832434160" expanded="true" signature="35264:35740" ph="{...}" />
-            <marker date="1517832434160" expanded="true" signature="35746:36000" ph="/**...*/" />
-            <marker date="1517832434160" expanded="true" signature="36081:36259" ph="{...}" />
-            <marker date="1517832434160" expanded="true" signature="36265:36441" ph="/**...*/" />
-            <marker date="1517832434160" expanded="true" signature="36487:37053" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="21209:21384" ph="/**...*/" />
+            <marker date="1517921366454" expanded="true" signature="21448:22162" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="22168:22240" ph="/**...*/" />
+            <marker date="1517921366454" expanded="true" signature="22286:22314" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="22320:22384" ph="/**...*/" />
+            <marker date="1517921366454" expanded="true" signature="22430:22608" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="22614:22677" ph="/**...*/" />
+            <marker date="1517921366454" expanded="true" signature="22722:23004" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="23010:23098" ph="/**...*/" />
+            <marker date="1517921366454" expanded="true" signature="23191:23901" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="23284:23425" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="23524:23656" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="23759:23895" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="23807:23885" ph="//..." />
+            <marker date="1517921366454" expanded="true" signature="23908:24062" ph="/**...*/" />
+            <marker date="1517921366454" expanded="true" signature="24161:25422" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="24372:24457" ph="//..." />
+            <marker date="1517921366454" expanded="true" signature="25428:25602" ph="/**...*/" />
+            <marker date="1517921366454" expanded="true" signature="25663:25973" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="25979:26090" ph="/**...*/" />
+            <marker date="1517921366454" expanded="true" signature="26125:27286" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="27292:27367" ph="/**...*/" />
+            <marker date="1517921366454" expanded="true" signature="27403:27969" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="27975:28029" ph="/**...*/" />
+            <marker date="1517921366454" expanded="true" signature="28073:35422" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="28951:35167" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="29079:29321" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="29454:29518" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="29641:35153" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="30394:30922" ph="//..." />
+            <marker date="1517921366454" expanded="true" signature="31734:31901" ph="//..." />
+            <marker date="1517921366454" expanded="true" signature="33671:33791" ph="//..." />
+            <marker date="1517921366454" expanded="true" signature="34348:34570" ph="//..." />
+            <marker date="1517921366454" expanded="true" signature="34754:35005" ph="//..." />
+            <marker date="1517921366454" expanded="true" signature="35647:35700" ph="/**...*/" />
+            <marker date="1517921366454" expanded="true" signature="35794:36386" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="36392:36437" ph="/**...*/" />
+            <marker date="1517921366454" expanded="true" signature="36475:36934" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="37016:37107" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="37113:37174" ph="/**...*/" />
+            <marker date="1517921366454" expanded="true" signature="37245:37721" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="37727:37981" ph="/**...*/" />
+            <marker date="1517921366454" expanded="true" signature="38062:38240" ph="{...}" />
+            <marker date="1517921366454" expanded="true" signature="38246:38422" ph="/**...*/" />
+            <marker date="1517921366454" expanded="true" signature="38468:39034" ph="{...}" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/VideoBaseHelper.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="248">
-          <caret line="145" column="33" lean-forward="true" selection-start-line="145" selection-start-column="33" selection-end-line="145" selection-end-column="33" />
+        <state relative-caret-position="374">
+          <caret line="72" column="0" lean-forward="true" selection-start-line="72" selection-start-column="0" selection-end-line="72" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aramco/carwatcher/ApiConnector.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="299">
-          <caret line="50" column="24" lean-forward="false" selection-start-line="50" selection-start-column="24" selection-end-line="50" selection-end-column="24" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>

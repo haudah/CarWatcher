@@ -92,6 +92,11 @@ public class Video implements Parcelable
         return address;
     }
 
+    public void setAddress(String address)
+    {
+        this.address = address;
+    }
+
     //PARCELABLE IMPLEMENTATION
     @Override
     public void writeToParcel(Parcel dest, int flags)

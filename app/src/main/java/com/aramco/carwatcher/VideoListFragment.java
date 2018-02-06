@@ -194,7 +194,7 @@ public class VideoListFragment extends Fragment
             int minutes = v.getDuration() / 60;
             int seconds = v.getDuration() - minutes * 60;
             durationTextView.setText(String.format("%02dm:%02ds", minutes, seconds));
-            locationTextView.setText(v.getLocation());
+            locationTextView.setText(v.getAddress());
             //get full path of file using filename
             String videoFilePath =
                 CaptureService.getVideoFilePath(v.getFileName(), getActivity());

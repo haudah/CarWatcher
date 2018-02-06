@@ -55,7 +55,7 @@ public class VideoFragment extends DialogFragment
         int minutes = video.getDuration() / 60;
         int seconds = video.getDuration() - minutes * 60;
         durationTextView.setText(String.format("%02dm:%02ds", minutes, seconds));
-        locationTextView.setText(video.getLocation());
+        locationTextView.setText(video.getAddress());
         //clicking on edit image should open the name fragment
         nameEditImageView.setOnClickListener(new View.OnClickListener() {
             @Override
