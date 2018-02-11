@@ -22,6 +22,7 @@ public class VideoCursorWrapper extends CursorWrapper
         long id = getLong(getColumnIndex("_id"));
         String title = getString(getColumnIndex(VideoTable.Cols.TITLE));
         String fileName = getString(getColumnIndex(VideoTable.Cols.FILE_NAME));
+        String comment = getString(getColumnIndex(VideoTable.Cols.COMMENT));
         int duration = getInt(getColumnIndex(VideoTable.Cols.DURATION));
         boolean submitted = (getInt(getColumnIndex(VideoTable.Cols.SUBMITTED)) != 0);
         String address = getString(getColumnIndex(VideoTable.Cols.ADDRESS));
@@ -29,6 +30,6 @@ public class VideoCursorWrapper extends CursorWrapper
         double longitude = getDouble(getColumnIndex(VideoTable.Cols.LONGITUDE));
         LatLng latLng = new LatLng(latitude, longitude);
 
-        return new Video(id, title, fileName, duration, address, submitted, latLng);
+        return new Video(id, title, fileName, comment, duration, address, submitted, latLng);
     }
 }

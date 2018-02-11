@@ -69,25 +69,20 @@ public class MainActivity extends AppCompatActivity
         // Add permission for camera and external storage
         // We do this preemptively since the permission is needed in a service
         List<String> permissions = new ArrayList<String>();
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED)
+        List<String> manifestPermissions = new ArrayList<String>();
+        manifestPermissions.add(android.Manifest.permission.CAMERA);
+        manifestPermissions.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        manifestPermissions.add(android.Manifest.permission.BLUETOOTH);
+        manifestPermissions.add(android.Manifest.permission.RECORD_AUDIO);
+        manifestPermissions.add(android.Manifest.permission.INTERNET);
+        manifestPermissions.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
+        for (String permission : manifestPermissions)
         {
-            permissions.add(android.Manifest.permission.CAMERA);
-        }
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED)
-        {
-            permissions.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH)
-                != PackageManager.PERMISSION_GRANTED)
-        {
-            permissions.add(android.Manifest.permission.BLUETOOTH);
-        }
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED)
-        {
-            permissions.add(android.Manifest.permission.RECORD_AUDIO);
+            if (ActivityCompat.checkSelfPermission(this, permission)
+                    != PackageManager.PERMISSION_GRANTED)
+            {
+                permissions.add(permission);
+            }
         }
         if (permissions.size() > 0)
         {

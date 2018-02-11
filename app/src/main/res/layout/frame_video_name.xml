@@ -14,12 +14,28 @@
         android:maxLength="50"
         android:selectAllOnFocus="true"
         />
+    <EditText
+        android:id="@+id/video_comment_edittext"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_below="@id/video_name_edittext"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:gravity="top|left"
+        android:hint="@string/video_comment_hint"
+        android:maxLength="150"
+        android:selectAllOnFocus="true"
+        android:inputType="textMultiLine"
+        android:lines="6"
+        android:background="@drawable/profile_textarea"
+        android:visibility="gone"
+        />
     <TextView
         android:id="@+id/video_name_length_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_below="@id/video_name_edittext"
+        android:layout_below="@id/video_comment_edittext"
         android:textSize="18sp"
         tools:text="30 / 50"
         />

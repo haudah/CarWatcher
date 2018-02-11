@@ -24,6 +24,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.CamcorderProfile;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
 import android.media.RingtoneManager;
@@ -36,6 +37,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
@@ -129,7 +131,8 @@ public class CaptureService extends Service
         public Video video;
         //the location of this video capture (populated after location is obtained)
         public Location location;
-        //the address
+        //the address corresponding to the stored location
+        public String address;
     }
     //this is a queue of all the video location requests
     private LinkedList<VideoLocationRequest> locationQueue;
@@ -370,6 +373,19 @@ public class CaptureService extends Service
                     .setContentTitle(resources.getString(R.string.notify_continuous_title))
                     .setContentText(resources.getString(R.string.notify_continuous_text))
                     .setContentIntent(pendingIntent);
+                //do-not-disturb should be activated when monitoring mode starts, but only for API > 23
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                {
+                    if (notifyManager.isNotificationPolicyAccessGranted())
+                    {
+                        Intent dndIntent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+                        startActivity(dndIntent);
+                    }
+                    else
+                    {
+                        notifyManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE);
+                    }
+                }
             }
             else
             {
@@ -378,6 +394,19 @@ public class CaptureService extends Service
                     .setContentTitle(resources.getString(R.string.notify_done_continuous_title))
                     .setContentText(resources.getString(R.string.notify_done_continuous_text))
                     .setContentIntent(null);
+                //do-not-disturb should be deactivated when monitoring mode stops, but only for API > 23
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                {
+                    if (notifyManager.isNotificationPolicyAccessGranted())
+                    {
+                        Intent dndIntent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+                        startActivity(dndIntent);
+                    }
+                    else
+                    {
+                        notifyManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL);
+                    }
+                }
             }
             notifyManager.notify(notifyIdContinuous, notifyBuilderContinuous.build());
         }
@@ -466,6 +495,7 @@ public class CaptureService extends Service
                     public void onResponse(String address)
                     {
                         SQLiteDatabase database = new VideoBaseHelper(context).getWritableDatabase();
+                        boolean needsRefresh = false;
                         //if we're getting the location of some already captured video(s),
                         //update the db entries
                         for (VideoLocationRequest request : toRemove)
@@ -474,7 +504,19 @@ public class CaptureService extends Service
                             if (request.video != null)
                             {
                                 VideoBaseHelper.addressVideo(request.video, address, database);
+                                needsRefresh = true;
                             }
+                            else
+                            {
+                                //if it's not done capturing yet, just store the address info and
+                                //onReady will get it
+                                request.address = address;
+                            }
+                        }
+                        //if database entries were modified, send broadcast for view updates
+                        if (needsRefresh)
+                        {
+                            sendBroadcast(new Intent(ACTION_NEW_VIDEO));
                         }
                     }
 
@@ -501,8 +543,15 @@ public class CaptureService extends Service
             @Override
             public void onProviderDisabled(String provider) {}
         };
-        //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+        try
+        {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+        }
+        catch (SecurityException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -604,7 +653,7 @@ public class CaptureService extends Service
      */
     private void setUpMediaRecorder(MediaRecorder recorder, String suffix) throws IOException
     {
-        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        //recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         //set the recording destination file
@@ -619,7 +668,7 @@ public class CaptureService extends Service
         recorder.setVideoFrameRate(30);
         recorder.setVideoSize(videoSize.getWidth(), videoSize.getHeight());
         recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+        //recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
 
         int rotation = getResources().getConfiguration().orientation;
         switch (sensorOrientation)
@@ -792,14 +841,33 @@ public class CaptureService extends Service
                             String address = getResources().getString(R.string.getting_location);
                             //check if location was already obtained during capture; note that if it was, it would be in the
                             //last element added to the location queue
+                            boolean removeLast = false;
                             if (locationQueue.getLast().location != null)
                             {
                                 Location location = locationQueue.getLast().location;
                                 latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                                //address string will simply be the coordinates until the actual address is obtained
-                                address = String.format("%.6f,%.6f", latLng.getLatitude(), latLng.getLongitude());
+                                //if location was obtained, might as well check if address was too
+                                if (locationQueue.getLast().address != null)
+                                {
+                                    address = locationQueue.getLast().address;
+                                    //locationListener has populated all fields in this location request
+                                    //remove it from the queue
+                                    locationQueue.removeLast();
+                                    removeLast = true;
+                                }
+                                else
+                                {
+                                    //otherwise address string will simply be the coordinates
+                                    //until the actual address is obtained
+                                    address = String.format("%.6f,%.6f", latLng.getLatitude(), latLng.getLongitude());
+                                }
                             }
-                            Video newVideo = new Video(0, title, videoFileName, duration, address, false, latLng);
+                            Video newVideo = new Video(0, title, videoFileName, "", duration, address, false, latLng);
+                            //if the locationListener still needs to update this location request
+                            if (!removeLast)
+                            {
+                                locationQueue.getLast().video = newVideo;
+                            }
                             SQLiteDatabase database = new VideoBaseHelper(context).getWritableDatabase();
                             VideoBaseHelper.addVideo(newVideo, database);
                             //when done creating a video, send a broadcast intent for interested listeners

@@ -13,6 +13,7 @@ public class VideoDbSchema
             public static final String ADDRESS = "address";
             public static final String DURATION = "duration";
             public static final String FILE_NAME = "file_name";
+            public static final String COMMENT = "comment";
             public static final String SUBMITTED = "submitted";
             public static final String LATITUDE = "latitude";
             public static final String LONGITUDE = "longitude";

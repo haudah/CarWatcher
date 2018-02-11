@@ -101,7 +101,6 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/list_item_clock_container"
             android:layout_marginTop="2dp"
             android:layout_marginStart="20dp"
             >
@@ -122,10 +121,50 @@
                 />
         </LinearLayout>
         <LinearLayout
+            android:id="@+id/video_item_comment_container"
+            android:layout_height="65dp"
+            android:layout_width="match_parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_below="@id/user_profile_banner"
+            android:background="@drawable/profile_textarea"
+            android:orientation="horizontal"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:text="@string/comment_header"
+                />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="15dp"
+                >
+                <TextView
+                    android:id="@+id/video_item_comment_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    tools:text="@string/sample_comment"
+                    android:textColor="@color/black"
+                    />
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginStart="7dp"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/ic_edit_grey"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
+                    />
+            </RelativeLayout>
+        </LinearLayout>
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="15dp"
             android:layout_marginBottom="10dp"
             android:weightSum="100"
             >

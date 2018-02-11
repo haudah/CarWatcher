@@ -1,6 +1,7 @@
 package com.aramco.carwatcher;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,7 +44,9 @@ public class ApiConnector
             try
             {
                 URL url = new URL(String.format(GEOCODING_URL, latitude, longitude, MAPS_API_KEY));
+                Log.d("CARWATCHER", "Opening URL connection.");
                 HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                Log.d("CARWATCHER", "Opened URL connection.");
                 connection.setRequestMethod("GET");
 
                 InputStream is = connection.getInputStream();
@@ -56,7 +59,7 @@ public class ApiConnector
                 }
                 String jsonString = jsonBuilder.toString();
                 //parse it into a json object
-                JSONObject json = new JSONObject(inputLine);
+                JSONObject json = new JSONObject(jsonString);
                 //get street and city from first result
                 String city = null;
                 String street = null;
@@ -67,7 +70,7 @@ public class ApiConnector
                     //get the component type (only the first type, but verify this)
                     JSONObject component = components.getJSONObject(i);
                     String type = component.getJSONArray("types").getString(0);
-                    if (type.equals("administrative_area_level_2"))
+                    if (type.equals("administrative_area_level_2") || type.equals("locality"))
                     {
                         city = component.getString("long_name");
                     }

@@ -27,6 +27,7 @@ public class VideoBaseHelper extends SQLiteOpenHelper
                 "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 VideoTable.Cols.TITLE + " CHAR(20), " +
                 VideoTable.Cols.FILE_NAME + " CHAR(50), " +
+                VideoTable.Cols.COMMENT + " VARCHAR(150), " +
                 VideoTable.Cols.DURATION + " INTEGER, " +
                 VideoTable.Cols.SUBMITTED + " INTEGER, " +
                 VideoTable.Cols.ADDRESS + " VARCHAR(100), " +
@@ -94,6 +95,7 @@ public class VideoBaseHelper extends SQLiteOpenHelper
         ContentValues values = new ContentValues();
         values.put(VideoTable.Cols.TITLE, video.getTitle());
         values.put(VideoTable.Cols.FILE_NAME, video.getFileName());
+        values.put(VideoTable.Cols.COMMENT, video.getComment());
         values.put(VideoTable.Cols.DURATION, video.getDuration());
         values.put(VideoTable.Cols.SUBMITTED, video.isSubmitted());
         values.put(VideoTable.Cols.ADDRESS, video.getAddress());
@@ -142,6 +144,20 @@ public class VideoBaseHelper extends SQLiteOpenHelper
     {
         ContentValues values = new ContentValues();
         values.put(VideoTable.Cols.TITLE, video.getTitle());
+        String id = Long.toString(video.getId());
+        return (database.update(VideoTable.NAME, values, "_id=?", new String[] {id}) == 1);
+    }
+    
+    /**
+     * Updates the comment of the specified video.
+     *
+     * @param video the video whose title is to be updated
+     * @param database the database containing the video to be updated
+     */
+    public static boolean editVideoComment(Video video, SQLiteDatabase database)
+    {
+        ContentValues values = new ContentValues();
+        values.put(VideoTable.Cols.COMMENT, video.getComment());
         String id = Long.toString(video.getId());
         return (database.update(VideoTable.NAME, values, "_id=?", new String[] {id}) == 1);
     }

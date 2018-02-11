@@ -37,7 +37,10 @@
     <string name="video_item_submit">Submit</string>
     <string name="video_item_delete">Delete</string>
     <string name="video_name_hint">Enter video name</string>
+    <string name="video_comment_hint">Enter video comment</string>
+    <string name="comment_hint">Enter video comment</string>
     <string name="edit_video_name_message">Edit video name</string>
+    <string name="edit_video_comment_message">Edit video comment</string>
     <string name="dummy_location">Canyon Road, Dhahran</string>
     <string name="getting_location">Getting Location</string>
     <string name="enabled">Enabled</string>
@@ -48,4 +51,6 @@
     <string name="settings">Settings</string>
     <string name="dhahran_eastern_province">Dhahran, Eastern Province</string>
     <string name="hani_audah">Hani Audah</string>
+    <string name="comment_header">Comment</string>
+    <string name="sample_comment">This is a long comment that will be used for demo purposes in the layout.</string>
 </resources>

@@ -11,6 +11,7 @@ public class Video implements Parcelable
     private long id;
     private String title;
     private String fileName;
+    private String comment;
     private int duration;
     private boolean submitted;
     private String address;
@@ -27,12 +28,13 @@ public class Video implements Parcelable
      * @param submitted whether or not this video was submitted to CarWatcher
      * @param latLng the lat/lng where this video was captured
      */
-    public Video(long id, String title, String fileName, int duration, String address,
-            boolean submitted, LatLng latLng)
+    public Video(long id, String title, String fileName, String comment,
+            int duration, String address, boolean submitted, LatLng latLng)
     {
         this.id = id;
         this.title = title;
         this.fileName = fileName;
+        this.comment = comment;
         this.duration = duration;
         this.address = address;
         this.submitted = submitted;
@@ -87,6 +89,16 @@ public class Video implements Parcelable
         return latLng;
     }
 
+    public String getComment()
+    {
+        return comment;
+    }
+
+    public void setComment(String comment)
+    {
+        this.comment = comment;
+    }
+
     public String getAddress()
     {
         return address;
@@ -104,6 +116,7 @@ public class Video implements Parcelable
         dest.writeLong(id);
         dest.writeString(title);
         dest.writeString(fileName);
+        dest.writeString(comment);
         dest.writeInt(duration);
         dest.writeInt((submitted)? 1 : 0);
         dest.writeString(address);
@@ -128,6 +141,7 @@ public class Video implements Parcelable
         id = source.readLong();
         title = source.readString();
         fileName = source.readString();
+        comment = source.readString();
         duration = source.readInt();
         submitted = source.readInt() != 0;
         address = source.readString();

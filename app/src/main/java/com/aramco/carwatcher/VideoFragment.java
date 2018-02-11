@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.File;
@@ -30,6 +31,10 @@ public class VideoFragment extends DialogFragment
     //the nameTextView is an instance var since it's the only
     //one that may change
     private TextView nameTextView;
+    //actually the comment might change too
+    private TextView commentTextView;
+    //the linearLayout containing the comment
+    private LinearLayout commentContainer;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
@@ -43,6 +48,8 @@ public class VideoFragment extends DialogFragment
         View submitButton = view.findViewById(R.id.video_item_submit);
         TextView submitTextView = view.findViewById(R.id.video_item_submit_textview);
         nameTextView = (TextView)view.findViewById(R.id.video_item_name_textview);
+        commentTextView = (TextView)view.findViewById(R.id.video_item_comment_textview);
+        commentContainer = (LinearLayout)view.findViewById(R.id.video_item_comment_container);
         TextView durationTextView = (TextView)view.findViewById(R.id.video_item_duration_textview);
         ImageView nameEditImageView = (ImageView)view.findViewById(R.id.video_item_name_edit_imageview);
         TextView locationTextView = (TextView)view.findViewById(R.id.video_item_location_textview);
@@ -52,6 +59,7 @@ public class VideoFragment extends DialogFragment
         ImageView submittedImageView = (ImageView)view.findViewById(R.id.video_item_submitted_imageview);
         //set the view content to reflect video info
         nameTextView.setText(video.getTitle());
+        commentTextView.setText(video.getComment());
         int minutes = video.getDuration() / 60;
         int seconds = video.getDuration() - minutes * 60;
         durationTextView.setText(String.format("%02dm:%02ds", minutes, seconds));
@@ -62,7 +70,19 @@ public class VideoFragment extends DialogFragment
             public void onClick(View v)
             {
                 FragmentManager fm = getFragmentManager();
-                VideoNameFragment fragment = VideoNameFragment.newInstance(video);
+                VideoNameFragment fragment = VideoNameFragment.newInstance(video, false);
+                fragment.setTargetFragment(VideoFragment.this, 0);
+                fragment.show(fm, "video_name_fragment");
+            }
+        });
+        //clicking on comment container should open the comment fragment
+        commentContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                FragmentManager fm = getFragmentManager();
+                //comment should be true
+                VideoNameFragment fragment = VideoNameFragment.newInstance(video, true);
                 fragment.setTargetFragment(VideoFragment.this, 0);
                 fragment.show(fm, "video_name_fragment");
             }
@@ -147,6 +167,16 @@ public class VideoFragment extends DialogFragment
         nameTextView.setText(title);
     }
 
+    /**
+     * Update the comment of the video fragment with the specified string.
+     *
+     * @param comment the new comment of the video
+     */
+    public void updateComment(String comment)
+    {
+        commentTextView.setText(comment);
+    }
+
     public static VideoFragment newInstance(Video video)
     {
         Bundle args = new Bundle();
@@ -156,4 +186,3 @@ public class VideoFragment extends DialogFragment
         return fragment;
     }
 }
-
