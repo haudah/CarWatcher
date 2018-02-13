@@ -68,9 +68,8 @@ public class BluetoothReceiver extends BroadcastReceiver
                     if (device.getAddress().equals(bluetoothAddress))
                     {
                         //the device is charging and bluetooth is connected to the car, we can start
-                        //the continuous capture
-                        Intent captureIntent = CaptureService.newIntent(context, true);
-                        context.startService(captureIntent);
+                        //the continuous capture (if its not already running)
+                        startCaptureIfNotRunning(context);
                         found = true;
                         break;
                     }

@@ -174,6 +174,8 @@ public class VideoBaseHelper extends SQLiteOpenHelper
         ContentValues values = new ContentValues();
         values.put(VideoTable.Cols.LATITUDE, latitude);
         values.put(VideoTable.Cols.LONGITUDE, longitude);
+        //note that we also update the address string to be the coordinates
+        values.put(VideoTable.Cols.ADDRESS, String.format("%.6f, %.6f", latitude, longitude));
         String id = Long.toString(video.getId());
         return (database.update(VideoTable.NAME, values, "_id=?", new String[] {id}) == 1);
     }

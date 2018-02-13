@@ -48,4 +48,10 @@
     <string name="hani_audah">هاني عودة</string>
     <string name="dhahran_eastern_province">ذهران, الشرقية</string>
     <string name="view_captured">عرض الملتقط</string>
+    <string name="video_comment_hint">أدخل تعليق الفيديو</string>
+    <string name="comment_hint">أدخل تعليق الفيديو</string>
+    <string name="edit_video_comment_message">تغيير تعليق الفيديو</string>
+    <string name="getting_location">الحصول على الموقع</string>
+    <string name="comment_header">تعليق</string>
+    <string name="location_timeout">"الوقت لتحديد الموقع (ثانية) "</string>
 </resources>

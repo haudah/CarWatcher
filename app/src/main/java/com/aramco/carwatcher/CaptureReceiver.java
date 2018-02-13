@@ -17,6 +17,13 @@ public class CaptureReceiver extends BroadcastReceiver
     public void onReceive(Context context, Intent intent)
     {
         Log.i(TAG, "Received broadcast intent: " + intent.getAction());
+        //TODO: FOR DEBUGGING
+        if (intent.getExtras() != null && intent.getExtras().containsKey("DEBUG"))
+        {
+            Intent captureIntent = CaptureService.newIntent(context, true);
+            context.startService(captureIntent);
+            return;
+        }
         //same intent is used for capture/stop capturing
         Intent captureIntent = CaptureService.newIntent(context, false);
         context.startService(captureIntent);

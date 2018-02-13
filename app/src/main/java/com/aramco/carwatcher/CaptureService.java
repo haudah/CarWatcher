@@ -10,6 +10,7 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
@@ -58,6 +59,9 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
+import static com.aramco.carwatcher.SettingsActivity.DEFAULT_TIMEOUT;
+import static com.aramco.carwatcher.SettingsActivity.SETTINGS_FILE;
+import static com.aramco.carwatcher.SettingsActivity.TIMEOUT_SETTING;
 
 public class CaptureService extends Service
 {
@@ -72,9 +76,11 @@ public class CaptureService extends Service
     private static final String EXTRA_SET_RUNNING = "EXTRA_SET_RUNNING";
     private static final String EXTRA_SET_STOPPED = "EXTRA_SET_STOPPED";
     //the interval (in seconds) for recorder rotation during continuous capture mode
-    private static final long ROTATION_INTERVAL = TimeUnit.SECONDS.toMillis(500);
+    private static final long ROTATION_INTERVAL = TimeUnit.SECONDS.toMillis(400);
     //the action sent when a new video is captured
     public static final String ACTION_NEW_VIDEO = "com.aramco.carwatcher.CHECK_VIDEOS";
+    //how long after a click to stop a running continuous capture
+    public static final int CONTINUOUS_DURATION = 30;
     //the opened camera device
     private CameraDevice cameraDevice;
     //the media recorder that's going to be capturing video
@@ -140,6 +146,11 @@ public class CaptureService extends Service
     private boolean updatingLocation = false;
     //the api connector used to reverse geocode locations
     private ApiConnector apiConnector;
+    //the timeout (in seconds) to use for getting the location
+    private int locationTimeout;
+    //this handler will stop a continuousRecording after 30 seconds if the user
+    //does not stop it manually
+    private Handler continuousHandler = new Handler();
 
     @Override
     public void onCreate()
@@ -153,6 +164,9 @@ public class CaptureService extends Service
         //initialize the location queue
         locationQueue = new LinkedList<VideoLocationRequest>();
         apiConnector = new ApiConnector();
+        //if timeout setting is specified, use that
+        SharedPreferences sharedPref = getSharedPreferences(SETTINGS_FILE, Context.MODE_PRIVATE);
+        locationTimeout = sharedPref.getInt(TIMEOUT_SETTING, DEFAULT_TIMEOUT);
     }
 
     @Override
@@ -243,7 +257,10 @@ public class CaptureService extends Service
             if (!rotate)
             {
                 showNotification(userDriven, true);
-                getLocation(this);
+                if (userDriven)
+                {
+                    getLocation(this);
+                }
                 //start the actual recording unless its the firstRun
                 if (!firstRun)
                 {
@@ -277,6 +294,11 @@ public class CaptureService extends Service
                     if (continuousRecording || !continuousCapture)
                     {
                         showNotification(true, false);
+                        //stopping a continuousRecording, so cancel the continuousHandler
+                        if (continuousRecording)
+                        {
+                            continuousHandler.removeCallbacksAndMessages(null);
+                        }
                     }
                 }
                 stopRecordingVideo(rotate, userDriven, this);
@@ -289,6 +311,16 @@ public class CaptureService extends Service
                 //show notfication for user-driven
                 getLocation(this);
                 showNotification(true, true);
+                //the handler will stop this continuous recording in CONTINUOUS_DURATION seconds
+                //unless the user does so manually before that
+                continuousHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run()
+                    {
+                        Intent captureIntent = CaptureService.newIntent(CaptureService.this, false);
+                        startService(captureIntent);
+                    }
+                }, CONTINUOUS_DURATION * 1000);
             }
         }
 
@@ -374,7 +406,7 @@ public class CaptureService extends Service
                     .setContentText(resources.getString(R.string.notify_continuous_text))
                     .setContentIntent(pendingIntent);
                 //do-not-disturb should be activated when monitoring mode starts, but only for API > 23
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                if (false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
                 {
                     if (notifyManager.isNotificationPolicyAccessGranted())
                     {
@@ -395,7 +427,7 @@ public class CaptureService extends Service
                     .setContentText(resources.getString(R.string.notify_done_continuous_text))
                     .setContentIntent(null);
                 //do-not-disturb should be deactivated when monitoring mode stops, but only for API > 23
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                if (false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
                 {
                     if (notifyManager.isNotificationPolicyAccessGranted())
                     {
@@ -431,12 +463,15 @@ public class CaptureService extends Service
             //to update it
             return;
         }
+        //we should cancel getting a good location after 2 minutes of trying
+        final Handler cancelHandler = new Handler();
+        //handler is called after locationListener is defined
         //we'll now be getting location updates
         updatingLocation = true;
         attempt = 0;
         final LocationManager locationManager =
             (LocationManager)this.getSystemService(Context.LOCATION_SERVICE);
-        LocationListener locationListener = new LocationListener() {
+        final LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location)
             {
@@ -444,11 +479,13 @@ public class CaptureService extends Service
                 //also, I noticed some trailing calls after removing the listener, so make sure
                 //updaingLocation is actually true
                 //TODO: for testing, I'll just accept the fourth attempt, no matter how inaccurate
-                if (location.getAccuracy() > 20 && updatingLocation && attempt < 3)
+                if (!updatingLocation || (location.getAccuracy() > 20 && attempt < 3))
                 {
                     attempt++;
                     return;
                 }
+                //cancel the handler since we have a location now
+                cancelHandler.removeCallbacksAndMessages(null);
                 //its a solid location, check for any queue items awaiting location data
                 final List<VideoLocationRequest> toRemove = new ArrayList<VideoLocationRequest>();
                 //if any already captured videos were located, the list needs refresh
@@ -518,12 +555,14 @@ public class CaptureService extends Service
                         {
                             sendBroadcast(new Intent(ACTION_NEW_VIDEO));
                         }
+                        stopServiceIfPossible();
                     }
 
                     @Override
                     public void onErrorResponse()
                     {
                         //do nothing and hope for the best
+                        stopServiceIfPossible();
                     }
                 });
 
@@ -543,6 +582,15 @@ public class CaptureService extends Service
             @Override
             public void onProviderDisabled(String provider) {}
         };
+        cancelHandler.postDelayed(new Runnable() {
+            @Override
+            public void run()
+            {
+                //if this was called that means locationListener is surely still
+                //running since otherwise it would have been cancelled
+                locationManager.removeUpdates(locationListener);
+            }
+        }, locationTimeout * 1000);
         try
         {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
@@ -565,12 +613,13 @@ public class CaptureService extends Service
         i.putExtra(EXTRA_ROTATION, true);
         //rotations are obviously not user-driven
         i.putExtra(EXTRA_USER_DRIVEN, false);
-        PendingIntent pi = PendingIntent.getService(context, 0, i, 0);
+        //make sure to set one shot flag to prevent re-use
+        PendingIntent pi = PendingIntent.getService(context, 515, i, 0);
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         if (enable)
         {
             firstAlarm = true;
-            alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     SystemClock.elapsedRealtime() + ROTATION_INTERVAL, ROTATION_INTERVAL, pi);
         }
         else
@@ -859,7 +908,7 @@ public class CaptureService extends Service
                                 {
                                     //otherwise address string will simply be the coordinates
                                     //until the actual address is obtained
-                                    address = String.format("%.6f,%.6f", latLng.getLatitude(), latLng.getLongitude());
+                                    address = String.format("%.6f, %.6f", latLng.getLatitude(), latLng.getLongitude());
                                 }
                             }
                             Video newVideo = new Video(0, title, videoFileName, "", duration, address, false, latLng);
@@ -907,6 +956,10 @@ public class CaptureService extends Service
                     if (rotate || (continuousRecording && userDriven))
                     {
                         startRecordingVideo();
+                    }
+                    else
+                    {
+                        stopServiceIfPossible();
                     }
 
                     //we have to set continuousRecording to false, so this was moved to the onReady callback
@@ -1033,6 +1086,18 @@ public class CaptureService extends Service
             wl.acquire(seconds * 1000);
             PowerManager.WakeLock wl_cpu = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"CaptureCoreLock");
             wl_cpu.acquire(seconds * 1000);
+        }
+    }
+
+    /**
+     * This function is called whenever some actual work is completed, to check if there is
+     * any other work being done and stop the service if not.
+     */
+    private void stopServiceIfPossible()
+    {
+        if (!apiConnector.isBusy() && !updatingLocation && !isRecordingVideo)
+        {
+            stopSelf();
         }
     }
 }

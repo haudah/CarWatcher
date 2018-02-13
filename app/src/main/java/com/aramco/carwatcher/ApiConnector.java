@@ -21,6 +21,10 @@ public class ApiConnector
     private static final String GEOCODING_URL = 
         "https://maps.googleapis.com/maps/api/geocode/json?latlng=%.6f,%.6f&key=%s";
 
+    //the ApiConnector keeps track of how many address requests are pending
+    //this variable should only be updated from the UI thread
+    private int pendingRequests = 0;
+
     //this async task is used for making api calls on a separate thread
     private class RequestTask extends AsyncTask<Void, Void, String>
     {
@@ -99,6 +103,7 @@ public class ApiConnector
         @Override
         protected void onPostExecute(String result)
         {
+            pendingRequests--;
             //if result is null, there must have been an error
             if (result == null)
             {
@@ -116,8 +121,20 @@ public class ApiConnector
      */
     public void getAddress(double latitude, double longitude, GetAddressListener listener)
     {
+        //new request pending
+        pendingRequests++;
         //create an async task for getting the string
         RequestTask task = new RequestTask(latitude, longitude, listener);
         task.execute();
+    }
+
+    /**
+     * Returns whether there are any pending requests.
+     *
+     * @return true if there are pendingRequests
+     */
+    public boolean isBusy()
+    {
+        return pendingRequests > 0;
     }
 }

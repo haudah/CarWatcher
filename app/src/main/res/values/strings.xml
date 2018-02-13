@@ -53,4 +53,5 @@
     <string name="hani_audah">Hani Audah</string>
     <string name="comment_header">Comment</string>
     <string name="sample_comment">This is a long comment that will be used for demo purposes in the layout.</string>
+    <string name="location_timeout">Location Timeout (sec)</string>
 </resources>

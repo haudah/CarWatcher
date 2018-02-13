@@ -32,6 +32,7 @@ public class SettingsActivity extends AppCompatActivity
     private RadioButton arabicRadioButton;
     private CheckBox bluetoothCheckBox;
     private Spinner pairedNamesSpinner;
+    private Spinner timeoutSpinner;
     //the current language setting (0: english, 1: arabic)
     private int language;
     //the current bluetooth enabled setting
@@ -43,6 +44,8 @@ public class SettingsActivity extends AppCompatActivity
     public final static String LANGUAGE_SETTING = "LANGUAGE_SETTING";
     public final static String BLUETOOTH_ENABLED_SETTING = "BLUETOOTH_ENABLED_SETTING";
     public final static String BLUETOOTH_SETTING = "BLUETOOTH_SETTING";
+    public final static String TIMEOUT_SETTING = "TIMEOUT_SETTING";
+    public final static int DEFAULT_TIMEOUT = 120;
     public final static String SETTINGS_FILE = "CarWatcherSettings";
     //the list of paired bluetooth devices
     private List<BluetoothDevice> pairedDevices;
@@ -56,15 +59,18 @@ public class SettingsActivity extends AppCompatActivity
         setContentView(R.layout.activity_settings);
         //show the back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(getResources().getString(R.string.settings));
         //get view references
         englishRadioButton = (RadioButton)findViewById(R.id.settings_language_english);
         arabicRadioButton = (RadioButton)findViewById(R.id.settings_language_arabic);
         bluetoothCheckBox = (CheckBox)findViewById(R.id.settings_bluetooth_enabled);
         pairedNamesSpinner = (Spinner)findViewById(R.id.settings_bluetooth_spinner);
+        timeoutSpinner = (Spinner)findViewById(R.id.settings_timeout_spinner);
         //get current settings (if they've been configured previously)
         SharedPreferences sharedPref = getSharedPreferences(SETTINGS_FILE, Context.MODE_PRIVATE);
         language = sharedPref.getInt(LANGUAGE_SETTING, 0);
         bluetooth = sharedPref.getInt(BLUETOOTH_ENABLED_SETTING, 0) == 1;
+        int timeout = sharedPref.getInt(TIMEOUT_SETTING, DEFAULT_TIMEOUT);
 
         //need permission to use bluetooth
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH)
@@ -100,6 +106,24 @@ public class SettingsActivity extends AppCompatActivity
             new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, pairedNames);
         pairedNamesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         pairedNamesSpinner.setAdapter(pairedNamesAdapter);
+
+        List<String> timeouts = new LinkedList<String>();
+        timeouts.add("30");
+        timeouts.add("60");
+        timeouts.add("90");
+        timeouts.add("120");
+        timeouts.add("240");
+        ArrayAdapter<String> timeoutAdapter =
+            new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, timeouts);
+        timeoutAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        timeoutSpinner.setAdapter(timeoutAdapter);
+        for (int i = 0; i < timeouts.size(); i++)
+        {
+            if (Integer.valueOf(timeouts.get(i)) == timeout)
+            {
+                timeoutSpinner.setSelection(i);
+            }
+        }
 
         //set up the views according to last saved settings
         if (language == 1)
@@ -167,6 +191,8 @@ public class SettingsActivity extends AppCompatActivity
                 int i = pairedNamesSpinner.getSelectedItemPosition();
                 String bluetoothAddress = (i != 0)? pairedDevices.get(i).getAddress() : "NOT_CONFIGURED";
                 editor.putString(BLUETOOTH_SETTING, bluetoothAddress);
+                int timeout = Integer.valueOf(timeoutSpinner.getSelectedItem().toString());
+                editor.putInt(TIMEOUT_SETTING, timeout);
                 editor.commit();
                 finish();
                 return true;

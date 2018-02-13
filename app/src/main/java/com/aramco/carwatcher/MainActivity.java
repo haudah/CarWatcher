@@ -93,9 +93,14 @@ public class MainActivity extends AppCompatActivity
 
         //replace the main video list fragment
         FragmentManager fm = getSupportFragmentManager();
-        videoListFragment = (VideoListFragment)fm.findFragmentById(R.id.fragment_container);
+        Fragment tempFragment = fm.findFragmentById(R.id.fragment_container);
+        if (tempFragment instanceof VideoListFragment)
+        {
+            videoListFragment = (VideoListFragment)tempFragment;
+        }
         //fragment might be non-null after config change
-        if (videoListFragment == null)
+        //or it could be the NoContentFragment currently on display
+        if (videoListFragment == null && tempFragment == null)
         {
             videoListFragment = VideoListFragment.newInstance(false);
             fm.beginTransaction().add(R.id.fragment_container, videoListFragment).commit();

@@ -76,4 +76,28 @@
             >
         </Spinner>
     </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:text="@string/location_timeout"
+            android:textSize="16sp"
+            android:layout_centerVertical="true"
+            />
+        <Spinner
+            android:id="@+id/settings_timeout_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            >
+        </Spinner>
+    </RelativeLayout>
 </LinearLayout>
